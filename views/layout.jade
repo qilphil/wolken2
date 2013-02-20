@@ -24,10 +24,6 @@ head
     //
        Le fav and touch icons 
     link(rel='shortcut icon', href='../assets/ico/favicon.ico')
-    link(rel='apple-touch-icon-precomposed', sizes='144x144', href='../assets/ico/apple-touch-icon-144-precomposed.png')
-    link(rel='apple-touch-icon-precomposed', sizes='114x114', href='../assets/ico/apple-touch-icon-114-precomposed.png')
-    link(rel='apple-touch-icon-precomposed', sizes='72x72', href='../assets/ico/apple-touch-icon-72-precomposed.png')
-    link(rel='apple-touch-icon-precomposed', href='../assets/ico/apple-touch-icon-57-precomposed.png')
   body
     .navbar.navbar-fixed-top
       .navbar-inner
@@ -36,7 +32,7 @@ head
             span.icon-bar
             span.icon-bar
             span.icon-bar
-          a.brand(href='#') Project name
+          a.brand(href='#') Wolkenstarrer
           .btn-group.pull-right
             a.btn.dropdown-toggle(data-toggle='dropdown', href='#')
               i.icon-user
@@ -58,22 +54,6 @@ head
                 a(href='#contact') Contact
     .container-fluid
       .row-fluid
-        .span3
-          .well.sidebar-nav
-            ul.nav.nav-list
-              li.nav-header Sidebar
-              li.active
-                a(href='#') Link
-              li
-                a(href='#') Link
-              li
-                a(href='#') Link
-              li
-                a(href='#') Link
-              li.nav-header Sidebar
-              li
-                a(href='#') Link
-            
         #mainblock.span9
           .row-fluid
             .span12
@@ -81,17 +61,9 @@ head
                block content
               p.message
                 #testContent!= body
-              p
-                a.btn(href='#') View details »
-          .hero-unit
-            h1#heroheader Hello, world!
-            p
-              | This is a template for a simple marketing or informational website. It includes a large callout called the hero unit and three supporting pieces of content. Use it as a starting point to create something more unique.
-            p
-              a#runbutton.btn.btn-primary.btn-large Learn more »
       hr
       footer
-        p © Company 2012
+        p © Philipp Lutz 2013
 
     script(src='../assets/js/jquery.js')
     script(src='../assets/js/bootstrap-transition.js')
@@ -106,6 +78,4 @@ head
     script(src='../assets/js/bootstrap-collapse.js')
     script(src='../assets/js/bootstrap-carousel.js')
     script(src='../assets/js/bootstrap-typeahead.js')
-    script(src='/javascripts/wolken.js')
-    script(type="text/javascript",language="javascript")
-     $(function(){$('#fillmetoo').html("haha")});
+    script(src='/javascripts/wolken.js')    
