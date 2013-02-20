@@ -3,8 +3,13 @@ var app = {};
 app = {
     masterurl: window.location.protocol + "//" + window.location.host + "/ajax/",
     runit: function() {
-
-        $("#heroheader").load(app.masterurl + "User");
+        app.finishCurrent();
+        var saveData = {
+            clickX: app.states.clickX,
+            clickY: app.states.clickY
+        };
+        var saveString = JSON.stringify(saveData);
+        $("#messageBox").load(app.masterurl + "save", {data: saveString});
     },
     ajax_success: {
     },
@@ -50,6 +55,15 @@ app = {
         app.redraw_current(ctx);
 
     },
+    finishCurrent:function(){
+            if (app.states.currentX.length > 0) {
+                app.states.clickX.push(app.states.currentX);
+                app.states.clickY.push(app.states.currentY);
+            }
+            app.states.currentX = [];
+            app.states.currentY = [];
+
+    },
     addClick: function(x, y, dragging)
     {
         if (dragging) {
@@ -57,12 +71,7 @@ app = {
             app.states.currentY.push(y);
         }
         else {
-            if (app.states.currentX.length > 0) {
-                app.states.clickX.push(app.states.currentX);
-                app.states.clickY.push(app.states.currentY);
-            }
-            app.states.currentX = [];
-            app.states.currentY = [];
+            app.finishCurrent()
         }
 
     },
