@@ -1,5 +1,4 @@
 "use strict";
-
 var app = {};
 app = {
     masterurl: window.location.protocol + "//" + window.location.host + "/ajax/",
@@ -13,34 +12,59 @@ app = {
         canvas: 0,
         clickX: [],
         clickY: [],
+        currentX: [],
+        currentY: [],
         paint: false,
         clickDrag: [],
         context: 0
     },
-    redraw: function() {
-//        app.states.canvas[0].width = app.states.canvas[0].width; // Clears the canvas
-        var ctx = app.states.context;
-        ctx.strokeStyle = "#000";
-        ctx.lineJoin = "round";
-        ctx.lineWidth = 1;
-        for (var i = 0; i < app.states.clickX.length; i++)
-        {
+    redraw_path_fragment: function(ctx, drawX, drawY) {
+        ctx.beginPath();
+        ctx.moveTo(drawX[drawX.length - 1], drawY[drawX.length - 1]);
+        for (var j = drawX.length - 1; j > 0; j--) {
+            ctx.lineTo(drawX[j], drawY[j]);
+        }
+        ctx.stroke();
+    },
+    redraw_current: function(ctx) {
+        var currentLength = app.states.currentX.length;
+        if (currentLength > 1) {
             ctx.beginPath();
-            if (app.states.clickDrag[i] && i) {
-                ctx.moveTo(app.states.clickX[i - 1], app.states.clickY[i - 1]);
-            } else {
-                ctx.moveTo(app.states.clickX[i] - 1, app.states.clickY[i] - 1);
-            }
-            ctx.lineTo(app.states.clickX[i], app.states.clickY[i]);
-            ctx.closePath();
+            ctx.moveTo(app.states.currentX[currentLength - 1], app.states.currentY[currentLength - 1]);
+            for (var i = currentLength - 1; i > 0; i--)
+                ctx.lineTo(app.states.currentX[i], app.states.currentY[i]);
             ctx.stroke();
         }
     },
+    get_context: function() {
+        var ctx = app.states.context;
+        ctx.strokeStyle = "#000";
+        ctx.lineJoin = "round";
+        ctx.lineWidth = 2;
+        return ctx;
+    },
+    redraw: function() {
+        var ctx = app.get_context();
+        for (var i = 0; i < app.states.clickX.length; i++)
+            app.redraw_path_fragment(ctx, app.states.clickX[i], app.states.clickY[i])
+        app.redraw_current(ctx);
+
+    },
     addClick: function(x, y, dragging)
     {
-        app.states.clickX.push(x);
-        app.states.clickY.push(y);
-        app.states.clickDrag.push(dragging);
+        if (dragging) {
+            app.states.currentX.push(x);
+            app.states.currentY.push(y);
+        }
+        else {
+            if (app.states.currentX.length > 0) {
+                app.states.clickX.push(app.states.currentX);
+                app.states.clickY.push(app.states.currentY);
+            }
+            app.states.currentX = [];
+            app.states.currentY = [];
+        }
+
     },
     runners: {
         install_events: function() {
@@ -50,19 +74,18 @@ app = {
             }
 
         },
+        image_loaded: function() {
+
+            app.states.canvas.attr({Width: this.width + "px", Height: this.height + "px"}).attr("style", "Border:1px solid black")
+            app.states.context = app.states.canvas[0].getContext("2d");
+            app.states.context.drawImage(this, 0, 0, this.width, this.height);
+        },
         setup: function() {
-            var canvasImg = $('#mainimg2');
             app.states.canvas = $("<canvas/>").attr("id", "canvas");
-            
             $('#mainimg').append(app.states.canvas);
-            
-            app.states.loadImg= $(new Image()).attr("id","loadImg");
-            app.states.loadImg.on("load",function(){
-                app.states.canvas.attr({Width: this.width + "px", Height: this.height + "px",Border:"1px solid black"})
-                app.states.context = app.states.canvas[0].getContext("2d");
-                app.states.context.drawImage(this, 0, 0, this.width, this.height);
-            })
-                .attr("src",'images/wolken2.jpg')
+            app.states.loadImg = $(new Image()).attr("id", "loadImg");
+            app.states.loadImg.on("load", app.runners.image_loaded)
+                    .attr("src", 'images/wolken2.jpg');
         }
     }
 };
@@ -88,9 +111,8 @@ app.events = {
         mousedown: function(e) {
             var mouseX = e.pageX - this.offsetLeft;
             var mouseY = e.pageY - this.offsetTop;
-
             app.states.paint = true;
-            app.addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, false);
+            app.addClick(mouseX, mouseY, false);
             app.redraw();
         }
     }
