@@ -128,7 +128,7 @@ app = {
     },
     save_success: function(data, status, xhr) {
         $("#messageBox").html(data.Message);
-        
+
         app.wolken.setSessionID(data.session_id);
         app.setBrowserUrl(data.session_id);
         var imgUrl = app.masterurl + "i/" + data.session_id;
@@ -169,11 +169,7 @@ app = {
             }
         },
         init_fileDrop: function() {
-            $("#canvas").on({
-                dragover: app.handlers.dragover,
-                dragleave: app.handlers.dragleave,
-                drop: app.handlers.drop
-            });
+            $("#canvas").on(app.filedrop_handlers);
         },
         setup: function() {
             $.ajaxSetup({
@@ -184,16 +180,30 @@ app = {
             app.drawing.loadImage('/images/wolken2.jpg');
         }
     },
-    handlers: {
-        dragover: function() {
+    filedrop_handlers: {
+        dragover: function(e) {
+            e.stopPropagation();
+            e.preventDefault();
             $(this).css("border-color", "green");
         },
-        dragleave: function() {
+        dragleave: function(e) {
+            e.stopPropagation();
+            e.preventDefault();
             $(this).css("border-color", "black");
         },
-        drop: function() {
-
+        drop: function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            $(this).css("border-color", "black");
+            console.log(e);
+        },
+        dragexit: function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            console.log(e);
+            $(this).css("border-color", "black");
         }
+
     }
 };
 app.events = {
