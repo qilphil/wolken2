@@ -1,5 +1,15 @@
 "use strict";
 var app = {};
+var wolke = function() {
+    this.canvas = 0;
+    this.clickX = [];
+    this.clickY = [];
+    this.currentX = [];
+    this.currentY = [];
+    this.paint = false;
+    this.clickDrag = [];
+    this.context = 0
+};
 app = {
     masterurl: window.location.protocol + "//" + window.location.host + "/",
     ajaxurl: window.location.protocol + "//" + window.location.host + "/ajax/",
@@ -46,16 +56,7 @@ app = {
         app.states.session_id = data.session_id;
         app.redraw();
     },
-    states: {
-        canvas: 0,
-        clickX: [],
-        clickY: [],
-        currentX: [],
-        currentY: [],
-        paint: false,
-        clickDrag: [],
-        context: 0
-    },
+    states: new wolke(),
     redraw_path_fragment: function(ctx, drawX, drawY) {
         ctx.beginPath();
         ctx.moveTo(drawX[drawX.length - 1], drawY[drawX.length - 1]);
