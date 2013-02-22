@@ -1,8 +1,9 @@
 extends layout
 
 block content
-  div#mainimg
-  button#runbutton Save !
+  #topMessage!= body
+  #mainimg
+    canvas#canvas
   #messageBox
   input#load_id(type='hidden',value=load_id)
 
