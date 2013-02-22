@@ -5,7 +5,8 @@
 
 var express = require('express')
   , routes = require('./routes')
-  , user = require('./routes/user')
+  , image = require('./routes/image')
+  , index = require('./routes/index')
   , ajax = require('./routes/ajax')
   , http = require('http')
   , path = require('path');
@@ -31,8 +32,8 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
+app.get("/i/:sessionid", image.index);
 app.get('/', routes.index);
-app.get('/users', user.list);
 app.post('/ajax/:command', ajax.run);
 
 http.createServer(app).listen(app.get('port'), function(){
