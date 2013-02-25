@@ -33,22 +33,12 @@ var dbutil = {
 exports.util = dbutil;
 exports.saveData = function(saveData, cb) {
     dbutil.col_lineData(function(err, collection) {
-        if (saveData._id) {
-            collection.save(saveData, {w: 1}, function() {
-                cb(saveData._id);
-                client.close();
-                console.log(saveData,"update",saveData.clickX.length);
-                console.dir(saveData);
-            });
-        }
-        else {
-            collection.save(saveData, {w: 1}, function() {
-                cb(saveData._id);
-                client.close();
-                console.log(saveData,"save",saveData.clickX.length);
-                console.dir(saveData);
-            });
-        }
+        saveData.timestamp = new Date();
+        collection.save(saveData, {w: 1}, function() {
+            cb(saveData._id);
+            client.close();
+            console.log(saveData, "update", saveData.clickX.length);
+        });
     });
 };
 exports.loadData = function(oIdStr, cb) {
@@ -61,6 +51,15 @@ exports.loadData = function(oIdStr, cb) {
                 client.close();
             });
         }
+    });
+};
+exports.listData = function(maxcount, cb) {
+    dbutil.col_lineData(function(err, collection) {
+        collection.find({timestamp: {$exists: true}}, {limit: maxcount, fields: {timestamp: 1}}).toArray(function(err, items) {
+            if (items.length > 0)
+                cb(items);
+            client.close();
+        });
     });
 };
 exports.setoId = function(dataObject, memberName) {

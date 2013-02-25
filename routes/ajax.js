@@ -12,7 +12,7 @@ ajax.commands = {
             var inData = JSON.parse(req.body.data);
 
             dbstuff.setoId(inData, "session_id");
-            
+
             dbstuff.saveData(inData, function(newId) {
                 var session_id = dbstuff.util.oId2b64(newId)
                 var return_data = {
@@ -31,7 +31,7 @@ ajax.commands = {
             res.send(JSON.stringify(return_data));
         }
     },
-     load: function(req, res) {
+    load: function(req, res) {
         try
         {
             var inData = JSON.parse(req.body.data);
@@ -41,7 +41,7 @@ ajax.commands = {
                 var session_id = dbstuff.util.oId2b64(gotData._id);
                 var return_data = {
                     Message: "loaded " + gotData.clickX.length + " lines. id:" + session_id,
-                    linedata:gotData,
+                    linedata: gotData,
                     session_id: session_id
                 }
                 res.send(JSON.stringify(return_data));
@@ -55,16 +55,44 @@ ajax.commands = {
             }
             res.send(JSON.stringify(return_data));
         }
+    },
+    list: function(req, res) {
+        try
+        {
+            var inData = JSON.parse(req.body.data);
+            dbstuff.listData(inData.maxcount?inData.maxcount:0, function(gotData) {
+                console.log("found");
+                for (i=0;i<gotData.length;i++) {
+                    var dataLine = gotData[i];
+                    dataLine.session_id = dbstuff.util.oId2b64(dataLine._id);
+                    delete dataLine._id;
+                };
+                var return_data = {
+                    Message: "found " + gotData.length ,
+                    count: gotData.length,
+                    listdata: gotData
+                };
+                res.send(JSON.stringify(return_data));
+            });
+        }
+        catch (exError) {
+            console.log(exError);
+            var return_data = {
+                Message: "error:" + exError.toString(),
+                session_id: ""
+            };
+            res.send(JSON.stringify(return_data));
+        }
     }
 };
 
 exports.run = function(req, res) {
     var command = req.params.command;
     if (ajax.commands[command]) {
-        console.log("ajax command:",command);
+        console.log("ajax command:", command);
         ajax.commands[command](req, res);
     }
     else {
-        console.log("unknown ajax command:",command);
+        console.log("unknown ajax command:", command);
     }
 };

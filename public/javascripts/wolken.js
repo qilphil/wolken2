@@ -2,7 +2,7 @@
 var app = {};
 var ajax = {
     ajaxurl: window.location.protocol + "//" + window.location.host + "/ajax/",
-    loadData: function(id) {
+    loadData: function(id, load_success) {
         var loadData = {
             session_id: id
         };
@@ -10,7 +10,18 @@ var ajax = {
         $.ajax(this.ajaxurl + "load",
                 {
                     data: {data: loadString},
-                    success: app.load_success
+                    success: load_success
+                });
+    },
+    listData: function(maxcount, list_success) {
+        var loadData = {
+            maxcount: maxcount
+        };
+        var loadString = JSON.stringify(loadData);
+        $.ajax(this.ajaxurl + "list",
+                {
+                    data: {data: loadString},
+                    success: list_success
                 });
     },
     saveData: function(data) {
@@ -21,95 +32,112 @@ var ajax = {
                 })
     }
 }
-var wolke = function() {
+var wolke = function(session_id) {
     this.clickX = [];
     this.clickY = [];
     this.currentX = [];
     this.currentY = [];
     this.paint = false;
     this.clickDrag = [];
-    this.setSessionID = function(sesid) {
-        app.wolken.session_id = sesid;
-    };
-    this.getSaveData = function() {
-
-        var saveData = {
-            clickX: this.clickX,
-            clickY: this.clickY
-        };
-        if (this.session_id)
-            saveData.session_id = this.session_id;
-
-        return JSON.stringify(saveData);
-    };
-    this.loadData = function(data) {
-        this.clickX = data.linedata.clickX;
-        this.clickY = data.linedata.clickY;
-        this.session_id = data.session_id;
-    };
-    this.pushXY = function(x, y) {
-        this.currentX.push(x);
-        this.currentY.push(y);
-    };
-    this.finishCurrent = function() {
-        if (this.currentX.length > 0) {
-            this.clickX.push(this.currentX);
-            this.clickY.push(this.currentY);
-        }
-        this.currentX = [];
-        this.currentY = [];
-    };
-    this.redraw = function(drawing) {
-        var ctx = drawing.get_context();
-        for (var i = 0; i < this.clickX.length; i++)
-            drawing.redraw_path_fragment(ctx, {X: this.clickX[i], Y: this.clickY[i]});
-        drawing.redraw_current(ctx, {X: this.currentX, Y: this.currentY});
-    };
+    this.session_id = session_id;
+    if (session_id)
+        this.loadSession(session_id)
 };
-var drawing = function() {
+wolke.prototype.setSessionID = function(sesid) {
+    this.session_id = sesid;
+};
+wolke.prototype.loadSession = function(session_id) {
+    if (session_id)
+        ajax.loadData(session_id, this.dataLoaded);
+};
+wolke.prototype.dataLoaded = function(data, status, xhr) {
+    app.wolken.copyLineData(data);
+    app.setMessage(data.Message);
+    app.redraw();
+};
+wolke.prototype.getSaveData = function() {
+    var saveData = {
+        clickX: this.clickX,
+        clickY: this.clickY
+    };
+    if (this.session_id)
+        saveData.session_id = this.session_id;
+    return JSON.stringify(saveData);
+};
+wolke.prototype.copyLineData = function(data) {
+    this.clickX = data.linedata.clickX;
+    this.clickY = data.linedata.clickY;
+    this.session_id = data.session_id;
+};
+wolke.prototype.pushXY = function(x, y) {
+    this.currentX.push(x);
+    this.currentY.push(y);
+};
+wolke.prototype.finishCurrent = function() {
+    if (this.currentX.length > 0) {
+        this.clickX.push(this.currentX);
+        this.clickY.push(this.currentY);
+    }
+    this.currentX = [];
+    this.currentY = [];
+};
+wolke.prototype.redraw = function(drawing) {
+    var ctx = drawing.get_context();
+    for (var i = 0; i < this.clickX.length; i++)
+        drawing.redraw_path_fragment(ctx, {X: this.clickX[i], Y: this.clickY[i]});
+    drawing.redraw_current(ctx, {X: this.currentX, Y: this.currentY});
+};
+
+var drawing = function(imageUrl) {
     this.canvas = $("#canvas");
     this.context = this.canvas[0].getContext("2d");
-    this.get_context = function() {
-        var ctx = this.context;
-        ctx.strokeStyle = "#000";
-        ctx.lineJoin = "round";
-        ctx.lineWidth = 2;
-        return ctx;
-    };
-    this.redraw_path_fragment = function(ctx, frag) {
-        ctx.beginPath();
-        ctx.moveTo(frag.X[frag.X.length - 1], frag.Y[frag.X.length - 1]);
-        for (var j = frag.X.length - 1; j > 0; j--) {
-            ctx.lineTo(frag.X[j], frag.Y[j]);
-        }
-        ctx.stroke();
-    };
-    this.redraw_current = function(ctx, cFrag) {
-        var currentLength = cFrag.X.length;
-        if (currentLength > 1) {
-            ctx.beginPath();
-            ctx.moveTo(cFrag.X[currentLength - 1], cFrag.Y[currentLength - 1]);
-            for (var i = currentLength - 1; i > 0; i--)
-                ctx.lineTo(cFrag.X[i], cFrag.Y[i]);
-            ctx.stroke();
-        }
-    };
-    this.newImg = function(image) {
-        this.canvas.attr({Width: image.width + "px", Height: image.height + "px"}).attr("style", "Border:3px solid black");
-
-        this.context.drawImage(image, 0, 0, image.width, image.height);
-    };
-    this.loadImage = function(imageUrl) {
-        this.cloudImg = $(new Image()).attr("id", "loadImg");
-        this.cloudImg.on("load", app.runners.image_loaded)
-                .attr("src", imageUrl);
-    };
+    if (imageUrl)
+        this.loadImage(imageUrl);
 };
+drawing.prototype.get_context = function() {
+    var ctx = this.context;
+    ctx.strokeStyle = "#000";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = 2;
+    return ctx;
+};
+drawing.prototype.redraw_path_fragment = function(ctx, frag) {
+    ctx.beginPath();
+    ctx.moveTo(frag.X[frag.X.length - 1], frag.Y[frag.X.length - 1]);
+    for (var j = frag.X.length - 1; j > 0; j--) {
+        ctx.lineTo(frag.X[j], frag.Y[j]);
+    }
+    ctx.stroke();
+};
+drawing.prototype.redraw_current = function(ctx, cFrag) {
+    var currentLength = cFrag.X.length;
+    if (currentLength > 1) {
+        ctx.beginPath();
+        ctx.moveTo(cFrag.X[currentLength - 1], cFrag.Y[currentLength - 1]);
+        for (var i = currentLength - 1; i > 0; i--)
+            ctx.lineTo(cFrag.X[i], cFrag.Y[i]);
+        ctx.stroke();
+    }
+};
+drawing.prototype.loadImage = function(imageUrl) {
+    this.cloudImg = $(new Image()).attr("id", "canvasImg");
+    this.cloudImg.on("load", this.image_loaded)
+            .attr("src", imageUrl);
+};
+drawing.prototype.displayImage = function(image) {
+    this.canvas.attr({Width: image.width + "px", Height: image.height + "px"}).attr("style", "Border:3px solid black");
+    this.context.drawImage(image, 0, 0, image.width, image.height);
+};
+drawing.prototype.image_loaded = function() {
+    app.drawing.displayImage(this);
+    app.redraw();
+};
+
 
 app = {
     masterurl: window.location.protocol + "//" + window.location.host + "/",
-    wolken: new wolke(),
-    drawing: new drawing(),
+    wolken: null,
+    drawing: null,
     saveImage: function() {
         app.queueSave(true);
         app.wolken.finishCurrent();
@@ -126,18 +154,18 @@ app = {
     setTopMessage: function(message) {
         $("#topMessage").html(message);
     },
+    setMessage: function(message) {
+        $("#messageBox").html(message);
+    },
     save_success: function(data, status, xhr) {
         $("#messageBox").html(data.Message);
-
         app.wolken.setSessionID(data.session_id);
         app.setBrowserUrl(data.session_id);
         var imgUrl = app.masterurl + "i/" + data.session_id;
         app.setTopMessage($("<span>ShareLink:</span> ").append($("<a/>").attr('href', imgUrl).html(imgUrl)));
     },
     load_success: function(data, status, xhr) {
-        $("#messageBox").html(data.Message);
-        app.wolken.loadData(data);
-        app.redraw();
+
     },
     redraw: function() {
         app.wolken.redraw(app.drawing);
@@ -147,6 +175,9 @@ app = {
             clearTimeout(app.currentTimeout);
         }
         app.currentTimeout = (clear) ? null : setTimeout(app.saveImage, 1000);
+    },
+    showList:function(data,status,xhr) {
+        console.log(data);
     },
     addClick: function(x, y, dragging)
     {
@@ -159,15 +190,6 @@ app = {
             for (event_element in app.events)
                 $(event_element).on(app.events[event_element]);
         },
-        image_loaded: function() {
-            app.drawing.newImg(this);
-            var session_id = $("#load_id").val()
-            if (session_id)
-                ajax.loadData(session_id);
-            if (window.File && window.FileList && window.FileReader) {
-                app.runners.init_fileDrop();
-            }
-        },
         init_fileDrop: function() {
             $("#canvas").on(app.filedrop_handlers);
         },
@@ -176,8 +198,8 @@ app = {
                 dataType: "json",
                 type: 'POST'
             });
-
-            app.drawing.loadImage('/images/wolken2.jpg');
+            app.drawing = new drawing('/images/wolken2.jpg');
+            app.wolken = new wolke($("#load_id").val());
         }
     },
     filedrop_handlers: {
@@ -207,17 +229,26 @@ app = {
     }
 };
 app.events = {
-    "#runbutton": {
-        click: app.saveImage
+    '#runList': {
+        click: function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            console.log(e);
+            ajax.listData(30, app.showList);
+        }
     },
     '#canvas': {
         mouseup: function(e) {
             app.wolken.paint = false;
-        }, mouseleave: function(e) {
-            app.wolken.paint = false;
+
         },
-        mouseenter: function(e) {
-            app.wolken.paint = e.button & 1;
+        mouseout: function(e) {
+            app.wolken.paint = false;
+            app.addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, false);
+        },
+        mouseover: function(e) {
+            var buttons = e.buttons == 'undefined' ? e.which : e.buttons;
+            app.wolken.paint = buttons & 1;
         },
         mousemove: function(e) {
             if (app.wolken.paint) {
