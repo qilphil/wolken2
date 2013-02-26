@@ -176,7 +176,7 @@ app = {
         }
         app.currentTimeout = (clear) ? null : setTimeout(app.saveImage, 1000);
     },
-    showList:function(data,status,xhr) {
+    showList: function(data, status, xhr) {
         console.log(data);
     },
     addClick: function(x, y, dragging)
@@ -235,6 +235,50 @@ app.events = {
             e.preventDefault();
             console.log(e);
             ajax.listData(30, app.showList);
+        }
+    },
+    '#runVoronoi': {
+        click: function(e) {
+            var xyData = [];
+            console.log(app.wolken);
+            for (var i = 0; i < app.wolken.clickX.length; i++)
+                for (var j = 0; j < app.wolken.clickX[i].length; j++)
+                    xyData.push([app.wolken.clickX[i][j], app.wolken.clickY[i][j]]);
+            var svg = d3.select("body").append("svg")
+                    .attr("width", app.drawing.canvas.width())
+                    .attr("height", app.drawing.canvas.height())
+                    .attr("class", "PiYG")
+                    .style("position","absolute")
+                    .style("opacity","0.6")
+                    .style("left",app.drawing.canvas.position().left)
+                    .style("top",app.drawing.canvas.position().top);
+                            
+                    
+
+            var path = svg.append("g").selectAll("path");
+            
+            // creat circles on the xyDatapoints
+            svg.selectAll("circle")
+                    .data(xyData.slice(1))
+                    .enter().append("circle")
+                    .attr("transform", function(d) {
+                return "translate(" + d + ")";
+            })
+                    .attr("r", 2);
+
+            redraw();
+
+            function redraw() {
+                path = path.data(d3.geom.voronoi(xyData).map(function(d) {
+                    return "M" + d.join("L") + "Z";
+                }), String);
+                path.exit().remove();
+                path.enter().append("path").attr("class", function(d, i) {
+                    return "q" + (i % 9) + "-9";
+                }).attr("d", String);
+                path.order();
+            }
+
         }
     },
     '#canvas': {
