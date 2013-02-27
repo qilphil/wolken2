@@ -1,0 +1,15 @@
+/* 
+    Document   : wolken
+    Created on : 27.02.2013, 13:46:05
+    Author     : Don Bonzo
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+body {
+    padding-top: 60px;
+    padding-bottom: 40px;
+}
+.sidebar-nav {
+    padding: 9px 0;
+}
