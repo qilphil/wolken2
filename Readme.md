@@ -6,7 +6,7 @@ der Möglichkeit, Hintergrundgrafiken einzubinden.
 ## Todos
 
 * Multiplay-synchronisation
-* Image-Upload by Dragdrop
+* ~~Image-Upload by Dragdrop~~
 * Store image information with Drawing
 * Selectable Backgrounds
 * Thumbnails
