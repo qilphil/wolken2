@@ -1,5 +1,6 @@
 "use strict";
 var app = {};
+
 var ajax = {
     ajaxurl: window.location.protocol + "//" + window.location.host + "/ajax/",
     loadData: function(id, load_success) {
@@ -29,9 +30,18 @@ var ajax = {
                 {
                     data: {data: data},
                     success: app.save_success
-                })
+                });
+    },
+    uploadBackground: function(fileName, fileData) {
+        var saveData = {
+            fileName: fileName,
+            fileData: fileData
+        };
+        var saveString = JSON.stringify(saveData);
+        $.ajax(this.ajaxurl + "uploadBackground", {data: {data: saveString},
+            success: app.backgroundSuccess});
     }
-}
+};
 var wolke = function(session_id) {
     this.clickX = [];
     this.clickY = [];
@@ -54,12 +64,20 @@ wolke.prototype.dataLoaded = function(data, status, xhr) {
     app.wolken.copyLineData(data);
     app.setMessage(data.Message);
     app.redraw();
+    if (data.linedata.altImage)
+    {
+        app.drawing.loadImage(data.linedata.altImage);
+        this.altImage = data.linedata.altImage;
+    }
 };
 wolke.prototype.getSaveData = function() {
     var saveData = {
         clickX: this.clickX,
         clickY: this.clickY
     };
+    if (this.altImage) {
+        saveData.altImage = this.altImage;
+    }
     if (this.session_id)
         saveData.session_id = this.session_id;
     return JSON.stringify(saveData);
@@ -121,6 +139,9 @@ drawing.prototype.redraw_current = function(ctx, cFrag) {
 };
 drawing.prototype.loadImage = function(imageUrl) {
     this.cloudImg = $(new Image()).attr("id", "canvasImg");
+    if (imageUrl != app.defaultImgUrl) {
+        app.wolken.altImage = imageUrl;
+    };
     this.cloudImg.on("load", this.image_loaded)
             .attr("src", imageUrl);
 };
@@ -130,12 +151,14 @@ drawing.prototype.displayImage = function(image) {
 };
 drawing.prototype.image_loaded = function() {
     app.drawing.displayImage(this);
+
     app.redraw();
 };
 
 
 app = {
     masterurl: window.location.protocol + "//" + window.location.host + "/",
+    defaultImgUrl: '/images/wolken2.jpg',
     wolken: null,
     drawing: null,
     saveImage: function() {
@@ -155,7 +178,12 @@ app = {
         $("#topMessage").html(message);
     },
     setMessage: function(message) {
-        $("#messageBox").html(message);
+        $("#topStatus").html(message);
+    },
+    backgroundSuccess: function(data, status) {
+        app.wolken.altImage = data.backgroundUrl;
+        app.setMessage(data.Message);
+        app.saveImage();
     },
     save_success: function(data, status, xhr) {
         $("#messageBox").html(data.Message);
@@ -163,9 +191,6 @@ app = {
         app.setBrowserUrl(data.session_id);
         var imgUrl = app.masterurl + "i/" + data.session_id;
         app.setTopMessage($("<span>ShareLink:</span> ").append($("<a/>").attr('href', imgUrl).html(imgUrl)));
-    },
-    load_success: function(data, status, xhr) {
-
     },
     redraw: function() {
         app.wolken.redraw(app.drawing);
@@ -177,7 +202,9 @@ app = {
         app.currentTimeout = (clear) ? null : setTimeout(app.saveImage, 1000);
     },
     showList: function(data, status, xhr) {
-        console.log(data);
+        var listData = data.listdata;
+        _.each(listData, function(k, v) {
+        });
     },
     addClick: function(x, y, dragging)
     {
@@ -189,8 +216,12 @@ app = {
             var event_element;
             for (event_element in app.events)
                 $(event_element).on(app.events[event_element]);
+            app.runners.init_fileDrop();
         },
         init_fileDrop: function() {
+            jQuery.event.fixHooks.drop = {
+                props: ['dataTransfer']
+            };
             $("#canvas").on(app.filedrop_handlers);
         },
         setup: function() {
@@ -198,7 +229,7 @@ app = {
                 dataType: "json",
                 type: 'POST'
             });
-            app.drawing = new drawing('/images/wolken2.jpg');
+            app.drawing = new drawing(app.defaultImgUrl);
             app.wolken = new wolke($("#load_id").val());
         }
     },
@@ -217,68 +248,39 @@ app = {
             e.stopPropagation();
             e.preventDefault();
             $(this).css("border-color", "black");
-            console.log(e);
-        },
+            var droppedFiles = e.target.files || e.dataTransfer.files;
+
+            if (droppedFiles.length > 0)
+            {
+                var file = droppedFiles[0];
+                var re_jpg = /.jpe?g$/i;
+                if (re_jpg.test(file.name)) {
+                    var fr = new FileReader();
+                    fr.onload = function(e) {
+                        app.drawing.loadImage(e.target.result);
+                        ajax.uploadBackground(file.name, e.target.result);
+                    };
+                    fr.readAsDataURL(file);
+                }
+                else
+                    app.setMessage("JPG Files only !");
+            }
+      },
         dragexit: function(e) {
             e.stopPropagation();
             e.preventDefault();
-            console.log(e);
+
             $(this).css("border-color", "black");
         }
-
     }
 };
+
 app.events = {
     '#runList': {
         click: function(e) {
             e.stopPropagation();
             e.preventDefault();
-            console.log(e);
             ajax.listData(30, app.showList);
-        }
-    },
-    '#runVoronoi': {
-        click: function(e) {
-            var xyData = [];
-            console.log(app.wolken);
-            for (var i = 0; i < app.wolken.clickX.length; i++)
-                for (var j = 0; j < app.wolken.clickX[i].length; j++)
-                    xyData.push([app.wolken.clickX[i][j], app.wolken.clickY[i][j]]);
-            var svg = d3.select("body").append("svg")
-                    .attr("width", app.drawing.canvas.width())
-                    .attr("height", app.drawing.canvas.height())
-                    .attr("class", "PiYG")
-                    .style("position","absolute")
-                    .style("opacity","0.6")
-                    .style("left",app.drawing.canvas.position().left)
-                    .style("top",app.drawing.canvas.position().top);
-                            
-                    
-
-            var path = svg.append("g").selectAll("path");
-            
-            // creat circles on the xyDatapoints
-            svg.selectAll("circle")
-                    .data(xyData.slice(1))
-                    .enter().append("circle")
-                    .attr("transform", function(d) {
-                return "translate(" + d + ")";
-            })
-                    .attr("r", 2);
-
-            redraw();
-
-            function redraw() {
-                path = path.data(d3.geom.voronoi(xyData).map(function(d) {
-                    return "M" + d.join("L") + "Z";
-                }), String);
-                path.exit().remove();
-                path.enter().append("path").attr("class", function(d, i) {
-                    return "q" + (i % 9) + "-9";
-                }).attr("d", String);
-                path.order();
-            }
-
         }
     },
     '#canvas': {

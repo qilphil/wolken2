@@ -33,6 +33,7 @@ app.configure('development', function(){
 });
 
 app.get("/i/:sessionid", image.index);
+app.get("/bg/:imageid", image.sendBackground);
 app.get('/', routes.index);
 app.post('/ajax/:command', ajax.run);
 
