@@ -50,15 +50,18 @@ var wolke = function(session_id) {
     this.clickDrag = [];
     this.session_id = session_id;
     if (session_id)
-        this.loadSession(session_id)
+        this.loadSession(session_id);
 };
+
 wolke.prototype.setSessionID = function(sesid) {
     this.session_id = sesid;
 };
+
 wolke.prototype.loadSession = function(session_id) {
     if (session_id)
         ajax.loadData(session_id, this.dataLoaded);
 };
+
 wolke.prototype.dataLoaded = function(data, status, xhr) {
     app.wolken.copyLineData(data);
     app.setMessage(data.Message);
@@ -69,6 +72,7 @@ wolke.prototype.dataLoaded = function(data, status, xhr) {
         this.altImage = data.linedata.altImage;
     }
 };
+
 wolke.prototype.getSaveData = function() {
     var saveData = {
         clickX: this.clickX,
@@ -138,10 +142,9 @@ drawing.prototype.redraw_current = function(ctx, cFrag) {
 };
 drawing.prototype.loadImage = function(imageUrl) {
     this.cloudImg = $(new Image()).attr("id", "canvasImg");
-    if (imageUrl != app.defaultImgUrl) {
+    if (imageUrl != app.defaultImgUrl && !/^data:/.test(imageUrl)) {
         app.wolken.altImage = imageUrl;
-    }
-    ;
+    };
     this.cloudImg.on("load", this.image_loaded)
             .attr("src", imageUrl);
 };
