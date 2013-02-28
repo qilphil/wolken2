@@ -33,12 +33,11 @@ var ajax = {
                 });
     },
     uploadBackground: function(fileName, fileData) {
-        var saveData = {
-            fileName: fileName,
-            fileData: fileData
-        };
-        var saveString = JSON.stringify(saveData);
-        $.ajax(this.ajaxurl + "uploadBackground", {data: {data: saveString},
+        $.ajax(this.ajaxurl + "uploadBackground", {
+            data: {
+                fileName: fileName, 
+                fileData: fileData
+            },
             success: app.backgroundSuccess});
     }
 };
@@ -141,7 +140,8 @@ drawing.prototype.loadImage = function(imageUrl) {
     this.cloudImg = $(new Image()).attr("id", "canvasImg");
     if (imageUrl != app.defaultImgUrl) {
         app.wolken.altImage = imageUrl;
-    };
+    }
+    ;
     this.cloudImg.on("load", this.image_loaded)
             .attr("src", imageUrl);
 };
@@ -265,7 +265,7 @@ app = {
                 else
                     app.setMessage("JPG Files only !");
             }
-      },
+        },
         dragexit: function(e) {
             e.stopPropagation();
             e.preventDefault();

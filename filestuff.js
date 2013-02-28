@@ -6,12 +6,8 @@ exports.makeName = function(name, ext) {
     return retPath;
 };
 exports.save = function(saveData, path, callBack) {
-    var regex = /^data:.+\/(.+);base64,(.*)$/;
-
-    var matches = saveData.match(regex);
-    var data = matches[2];
-    var buffer = new Buffer(data, 'base64');
-    console.log(path);
+    var regex = /^data:.+;base64,(.*)$/;
+    var buffer = new Buffer(saveData.match(regex)[1], 'base64');
     fs.writeFile(path, buffer, callBack);
 
 };

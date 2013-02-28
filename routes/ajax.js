@@ -58,9 +58,9 @@ ajax.commands = {
         }
     },
     uploadBackground: function(req, res) {
-        var inData = JSON.parse(req.body.data);
+        var inData = req.body;
         var fileData = inData.fileData;
-
+        console.log("gotData");
 
         var metaData = {
             purpose: "BackGround",
@@ -70,6 +70,7 @@ ajax.commands = {
 
         dbstuff.saveFile(metaData, function(newID) {
             var savePath = filestuff.makeName(newID, "jpg");
+            console.log("saveName",savePath);
             filestuff.save(fileData, savePath, function(err) {
                 console.log("saved");
                 var return_data = {

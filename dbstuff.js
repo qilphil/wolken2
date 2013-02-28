@@ -46,7 +46,7 @@ exports.loadData = function(oIdStr, cb) {
 exports.saveFile = function(saveData, cb) {
     dbutil.col('files', function(err, collection) {
         saveData.timestamp = new Date();
-
+        console.log("meta",saveData);
         collection.save(saveData, {w: 1}, function() {
             client.close();
             cb(saveData._id);
