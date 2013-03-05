@@ -2,8 +2,6 @@
  * GET home page.
  */
 var dbstuff = require("../dbstuff");
-
-
 exports.requireAuthentication = function(req, res) {
 
 }
