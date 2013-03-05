@@ -8,37 +8,48 @@ var ajax = {
             session_id: id
         };
         var loadString = JSON.stringify(loadData);
-        $.ajax(this.ajaxurl + "load",
-                {
-                    data: {data: loadString},
-                    success: load_success
-                });
+        $.ajax(this.ajaxurl + "load", {
+            data: {
+                data: loadString
+            },
+            success: load_success
+        });
+    },
+    send_signup: function(form, signup_success) {
+        console.log("saveData", form.serialize());
+        $.ajax(this.ajaxurl + "save_signup", {
+            data: form.serialize(),
+            success: signup_success
+        });
     },
     listData: function(maxcount, list_success) {
         var loadData = {
             maxcount: maxcount
         };
         var loadString = JSON.stringify(loadData);
-        $.ajax(this.ajaxurl + "list",
-                {
-                    data: {data: loadString},
-                    success: list_success
-                });
+        $.ajax(this.ajaxurl + "list", {
+            data: {
+                data: loadString
+            },
+            success: list_success
+        });
     },
     saveData: function(data) {
-        $.ajax(this.ajaxurl + "save",
-                {
-                    data: {data: data},
-                    success: app.save_success
-                });
+        $.ajax(this.ajaxurl + "save", {
+            data: {
+                data: data
+            },
+            success: app.save_success
+        });
     },
     uploadBackground: function(fileName, fileData) {
         $.ajax(this.ajaxurl + "uploadBackground", {
             data: {
-                fileName: fileName, 
+                fileName: fileName,
                 fileData: fileData
             },
-            success: app.backgroundSuccess});
+            success: app.backgroundSuccess
+        });
     }
 };
 var wolke = function(session_id) {
@@ -49,8 +60,7 @@ var wolke = function(session_id) {
     this.paint = false;
     this.clickDrag = [];
     this.session_id = session_id;
-    if (session_id)
-        this.loadSession(session_id);
+    if (session_id) this.loadSession(session_id);
 };
 
 wolke.prototype.setSessionID = function(sesid) {
@@ -58,16 +68,14 @@ wolke.prototype.setSessionID = function(sesid) {
 };
 
 wolke.prototype.loadSession = function(session_id) {
-    if (session_id)
-        ajax.loadData(session_id, this.dataLoaded);
+    if (session_id) ajax.loadData(session_id, this.dataLoaded);
 };
 
 wolke.prototype.dataLoaded = function(data, status, xhr) {
     app.wolken.copyLineData(data);
     app.setMessage(data.Message);
     app.redraw();
-    if (data.linedata.altImage)
-    {
+    if (data.linedata.altImage) {
         app.drawing.loadImage(data.linedata.altImage);
         this.altImage = data.linedata.altImage;
     }
@@ -81,8 +89,7 @@ wolke.prototype.getSaveData = function() {
     if (this.altImage) {
         saveData.altImage = this.altImage;
     }
-    if (this.session_id)
-        saveData.session_id = this.session_id;
+    if (this.session_id) saveData.session_id = this.session_id;
     return JSON.stringify(saveData);
 };
 wolke.prototype.copyLineData = function(data) {
@@ -105,15 +112,20 @@ wolke.prototype.finishCurrent = function() {
 wolke.prototype.redraw = function(drawing) {
     var ctx = drawing.get_context();
     for (var i = 0; i < this.clickX.length; i++)
-        drawing.redraw_path_fragment(ctx, {X: this.clickX[i], Y: this.clickY[i]});
-    drawing.redraw_current(ctx, {X: this.currentX, Y: this.currentY});
+    drawing.redraw_path_fragment(ctx, {
+        X: this.clickX[i],
+        Y: this.clickY[i]
+    });
+    drawing.redraw_current(ctx, {
+        X: this.currentX,
+        Y: this.currentY
+    });
 };
 
 var drawing = function(imageUrl) {
     this.canvas = $("#canvas");
     this.context = this.canvas[0].getContext("2d");
-    if (imageUrl)
-        this.loadImage(imageUrl);
+    if (imageUrl) this.loadImage(imageUrl);
 };
 drawing.prototype.get_context = function() {
     var ctx = this.context;
@@ -136,20 +148,23 @@ drawing.prototype.redraw_current = function(ctx, cFrag) {
         ctx.beginPath();
         ctx.moveTo(cFrag.X[currentLength - 1], cFrag.Y[currentLength - 1]);
         for (var i = currentLength - 1; i > 0; i--)
-            ctx.lineTo(cFrag.X[i], cFrag.Y[i]);
+        ctx.lineTo(cFrag.X[i], cFrag.Y[i]);
         ctx.stroke();
     }
 };
 drawing.prototype.loadImage = function(imageUrl) {
     this.cloudImg = $(new Image()).attr("id", "canvasImg");
-    if (imageUrl != app.defaultImgUrl && !/^data:/.test(imageUrl)) {
+    if (imageUrl !== app.defaultImgUrl && !/^data:/.test(imageUrl)) {
         app.wolken.altImage = imageUrl;
     };
     this.cloudImg.on("load", this.image_loaded)
-            .attr("src", imageUrl);
+        .attr("src", imageUrl);
 };
 drawing.prototype.displayImage = function(image) {
-    this.canvas.attr({Width: image.width + "px", Height: image.height + "px"}).attr("style", "Border:3px solid black");
+    this.canvas.attr({
+        Width: image.width + "px",
+        Height: image.height + "px"
+    }).attr("style", "Border:3px solid black");
     this.context.drawImage(image, 0, 0, image.width, image.height);
 };
 drawing.prototype.image_loaded = function() {
@@ -171,11 +186,8 @@ app = {
     },
     setBrowserUrl: function(newid) {
         var testurl = /\/i\/.{16}$/;
-        if (!testurl.test(document.location.href))
-            if (window.history.pushState)
-                window.history.pushState(null, null, "/i/" + newid);
-            else
-                window.location.href = imgUrl;
+        if (!testurl.test(document.location.href)) if (window.history.pushState) window.history.pushState(null, null, "/i/" + newid);
+        else window.location.href = imgUrl;
     },
     setTopMessage: function(message) {
         $("#topMessage").html(message);
@@ -187,6 +199,17 @@ app = {
         app.wolken.altImage = data.backgroundUrl;
         app.setMessage(data.Message);
         app.saveImage();
+    },
+
+    signup_success: function(data, status, xhr) {
+        console.log("success",data);
+        if (data.Error) {
+            var erroralert = $("<div class='alert'><button type='button' class='close' data-dismiss='alert'>&times;</button><strong>Fehler ! </strong><span id='alertMessage'>" + data.Message + "</span></div>");
+            console.log(erroralert);
+            $("#messageBox").append(erroralert);
+            $("#inp_" + data.Field).closest(".control-group").addClass("error");
+        }
+        app.setTopMessage($("User Created "));
     },
     save_success: function(data, status, xhr) {
         $("#messageBox").html(data.Message);
@@ -206,11 +229,9 @@ app = {
     },
     showList: function(data, status, xhr) {
         var listData = data.listdata;
-        _.each(listData, function(k, v) {
-        });
+        _.each(listData, function(k, v) {});
     },
-    addClick: function(x, y, dragging)
-    {
+    addClick: function(x, y, dragging) {
         dragging ? app.wolken.pushXY(x, y) : app.wolken.finishCurrent();
         app.queueSave();
     },
@@ -218,7 +239,7 @@ app = {
         install_events: function() {
             var event_element;
             for (event_element in app.events)
-                $(event_element).on(app.events[event_element]);
+            $(event_element).on(app.events[event_element]);
             app.runners.init_fileDrop();
         },
         init_fileDrop: function() {
@@ -232,8 +253,10 @@ app = {
                 dataType: "json",
                 type: 'POST'
             });
-            app.drawing = new drawing(app.defaultImgUrl);
-            app.wolken = new wolke($("#load_id").val());
+            if ($("#canvas").length > 0) {
+                app.drawing = new drawing(app.defaultImgUrl);
+                app.wolken = new wolke($("#load_id").val());
+            }
         }
     },
     filedrop_handlers: {
@@ -253,8 +276,7 @@ app = {
             $(this).css("border-color", "black");
             var droppedFiles = e.target.files || e.dataTransfer.files;
 
-            if (droppedFiles.length > 0)
-            {
+            if (droppedFiles.length > 0) {
                 var file = droppedFiles[0];
                 var re_jpg = /.jpe?g$/i;
                 if (re_jpg.test(file.name)) {
@@ -264,9 +286,7 @@ app = {
                         ajax.uploadBackground(file.name, e.target.result);
                     };
                     fr.readAsDataURL(file);
-                }
-                else
-                    app.setMessage("JPG Files only !");
+                } else app.setMessage("JPG Files only !");
             }
         },
         dragexit: function(e) {
@@ -284,6 +304,16 @@ app.events = {
             e.stopPropagation();
             e.preventDefault();
             ajax.listData(30, app.showList);
+        }
+    },
+    '#btn_signup': {
+        click: function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            $("#messageBox").html("");
+            $(".error").removeClass("error");
+            console.log("save", $('#frm_signup'));
+            ajax.send_signup($('#frm_signup'), app.signup_success);
         }
     },
     '#canvas': {
@@ -316,4 +346,3 @@ app.events = {
 };
 $(window).on('load', app.runners.setup);
 $(window).on('load', app.runners.install_events);
-

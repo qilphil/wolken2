@@ -20,5 +20,4 @@ exports.index = function(req, res) {
             load_id: req.params.sessionid
         });
     });
-
 };

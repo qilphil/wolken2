@@ -6,6 +6,8 @@
 var express = require('express')
   , routes = require('./routes')
   , image = require('./routes/image')
+  , user = require('./routes/user')
+  , admin = require('./routes/admin')
   , index = require('./routes/index')
   , ajax = require('./routes/ajax')
   , http = require('http')
@@ -24,6 +26,7 @@ app.configure(function(){
   app.use(express.methodOverride());
   app.use(express.cookieParser('your secret here'));
   app.use(express.session());
+
   app.use(app.router);
   app.use(express.static(path.join(__dirname, 'public')));
 });
@@ -36,6 +39,10 @@ app.get("/i/:sessionid", image.index);
 app.get("/bg/:imageid", image.sendBackground);
 app.get('/', routes.index);
 app.post('/ajax/:command', ajax.run);
+app.get("/signup",user.register);
+app.get("/login",user.login);
+//app.all('*', user.requireAuthentication, user.loadUser);
+app.get("/admin",admin.index)
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));

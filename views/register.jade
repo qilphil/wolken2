@@ -1,0 +1,25 @@
+extends layout
+
+block content
+  #messageBox
+  form.form-horizontal#frm_signup
+    .control-group
+      .controls
+        input#inp_name(type='text',name="name",placeholder='Username')
+    .control-group
+      .controls
+        input#inp_email(type='email',name="email",placeholder='EMail')
+    .control-group
+      .controls
+        input#inp_password(type='password',name="password",placeholder='Passwort')
+    .control-group
+      .controls
+        input#inp_password2(type='password',name="password2",placeholder='Passwort nochmal')
+    .control-group
+      .controls
+        button.btn#btn_signup(type='submit')
+          | Anmelden
+
+
+
+    

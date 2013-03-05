@@ -1,10 +1,7 @@
-
 /*
  * GET home page.
  */
 var dbstuff=require("../dbstuff");
-
-
 
 exports.index = function(req, res) {
     dbstuff.getMoD(function(err,results){
