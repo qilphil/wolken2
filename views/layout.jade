@@ -31,24 +31,35 @@ head
           a.brand(href='#') Wolkenstarrer
           .btn-group.pull-right
             a.btn.dropdown-toggle(data-toggle='dropdown', href='#')
-              i.icon-user
-              | Username
+              if locals.user 
+                i.icon-user
+                | &nbsp; #{user.name}
+              else
+                | &nbsp; Nicht Angemeldet
               span.caret
             ul.dropdown-menu
-              li
-                a(href='#') Profile
-              li.divider
-              li
-                a(href='/signup') Sign up
-              li.divider
-              li
-                a(href='#') Sign Out
+              if  locals.user
+                li
+                  a(href='/profile') Profile
+                li.divider
+                li
+                  a(href='/signout') Sign Out
+              else
+                li
+                  a(href='/signup') Sign up
+                li.divider
+                li
+                  a(href='/login') Log in
           .nav-collapse
             ul.nav
               li.active
                 a(href='/') Start Over
               li
-                a#runList(href='#') List
+                a#runList List
+              if locals.user 
+                li
+                  a(href='/admin') Admin
+                
               li
                 a#topStatus 
     .container-fluid

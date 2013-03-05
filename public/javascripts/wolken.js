@@ -16,10 +16,15 @@ var ajax = {
         });
     },
     send_signup: function(form, signup_success) {
-        console.log("saveData", form.serialize());
         $.ajax(this.ajaxurl + "save_signup", {
             data: form.serialize(),
             success: signup_success
+        });
+    },
+    send_login: function(form, login_success) {
+        $.ajax(this.ajaxurl + "do_login", {
+            data: form.serialize(),
+            success: login_success
         });
     },
     listData: function(maxcount, list_success) {
@@ -201,15 +206,22 @@ app = {
         app.saveImage();
     },
 
+    login_success: function(data, status, xhr) {
+      console.log(data);
+        var erroralert = $("<div class='alert'><button type='button' class='close' data-dismiss='alert'>&times;</button><strong>Fehler ! </strong><span id='alertMessage'>" + data.Message + "</span></div>");
+        if (data.status=="login_success") erroralert.addClass('alert-success').find("strong").html('');
+        $("#messageBox").append(erroralert);
+        $("#inp_" + data.Field).closest(".control-group").addClass("error");
+        app.setTopMessage($("<span>User Created </span>"));
+        document.location.href = app.masterurl;
+    },
     signup_success: function(data, status, xhr) {
-        console.log("success",data);
-        if (data.Error) {
-            var erroralert = $("<div class='alert'><button type='button' class='close' data-dismiss='alert'>&times;</button><strong>Fehler ! </strong><span id='alertMessage'>" + data.Message + "</span></div>");
-            console.log(erroralert);
-            $("#messageBox").append(erroralert);
-            $("#inp_" + data.Field).closest(".control-group").addClass("error");
-        }
-        app.setTopMessage($("User Created "));
+      
+        var erroralert = $("<div class='alert'><button type='button' class='close' data-dismiss='alert'>&times;</button><strong>Fehler ! </strong><span id='alertMessage'>" + data.Message + "</span></div>");
+        if (data.status=="signup_success") erroralert.addClass('alert-success');
+        $("#messageBox").append(erroralert);
+        $("#inp_" + data.Field).closest(".control-group").addClass("error").find("strong").html('');
+        app.setTopMessage($("<span>User Created </span>"));
     },
     save_success: function(data, status, xhr) {
         $("#messageBox").html(data.Message);
@@ -312,8 +324,17 @@ app.events = {
             e.preventDefault();
             $("#messageBox").html("");
             $(".error").removeClass("error");
-            console.log("save", $('#frm_signup'));
+           
             ajax.send_signup($('#frm_signup'), app.signup_success);
+        }
+    },
+    '#btn_login': {
+        click: function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            $("#messageBox").html("");
+            $(".error").removeClass("error");
+            ajax.send_login($('#frm_login'), app.login_success);
         }
     },
     '#canvas': {

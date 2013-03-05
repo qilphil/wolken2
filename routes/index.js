@@ -5,6 +5,6 @@ var dbstuff=require("../dbstuff");
 
 exports.index = function(req, res) {
     dbstuff.getMoD(function(err,results){
-        res.render('index', {title: 'Express', body: results.Message,load_id:""});
+        res.render('index', {user:req.currentUser,title: 'Express', body: results.Message,load_id:""});
     });
 };

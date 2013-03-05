@@ -2,60 +2,13 @@
  * GET users listing.
  */
 var dbstuff = require("../dbstuff"),
-        filestuff = require("../filestuff");
+    filestuff = require("../filestuff");
 
 var userstuff = require("../userstuff");
+var signup = require("./signup");
 var ajax = {};
 ajax.commands = {
-    save_signup: function(req, res) {
-        function valfail(msg, field) {
-            returnSignup(msg, field, true, "signup_fail", '');
-        }
-
-        function valEmpty(field, name) {
-            if (inData[field] == "") {
-                valfail(name + " darf nicht leer sein", field);
-            }
-            return !(inData[field] == "");
-        }
-
-        function returnSignup(Message, field, Error, status, id) {
-            res.send(JSON.stringify({
-                Message: Message,
-                Field: field,
-                Error: Error,
-                status: status,
-                id: id
-            }));
-        }
-
-        try {
-            var inData = req.body;
-            if (!inData) {
-                valfail("No Data Received", "");
-            } else {
-                if (valEmpty("password", "Passwort") && valEmpty("password2", "Passwortbestätigung") && valEmpty("email", "Email") && valEmpty("name", "Username")) {
-                    if (inData.password !== inData.password2) {
-                        valfail("Passwörter stimmen nicht überein", "password2");
-                    } else {
-                        var passSalt = userstuff.mkPassSalt(inData.password);
-                        var saveData = {
-                            name: inData.name,
-                            password: passSalt.pass,
-                            salt: passSalt.salt,
-                            email: inData.email.toLower()
-                        };
-                        dbstuff.saveSignup(saveData, function(savedData) {
-                            returnSignup("Benutzer " + savedData.name + " angelegt", "", false, "signup_success", savedData._id);
-                        })
-                    }
-                }
-            }
-        } catch (exError) {
-            console.log(exError);
-            returnSignup("error:" + exError.toString(), "", true, "signup_fail", '');
-        }
-    },
+    
     save: function(req, res) {
         try {
             var inData = JSON.parse(req.body.data);
@@ -134,13 +87,11 @@ ajax.commands = {
         try {
             var inData = JSON.parse(req.body.data);
             dbstuff.listData(inData.maxcount ? inData.maxcount : 0, function(gotData) {
-                console.log("found");
                 for (i = 0; i < gotData.length; i++) {
                     var dataLine = gotData[i];
                     dataLine.session_id = dataLine._id.toString();
                     delete dataLine._id;
-                }
-                ;
+                };
                 var return_data = {
                     Message: "found " + gotData.length,
                     count: gotData.length,
@@ -158,6 +109,8 @@ ajax.commands = {
         }
     }
 };
+ajax.commands.save_signup = signup.save_signup;
+ajax.commands.do_login = signup.do_login;
 
 exports.run = function(req, res) {
     var command = req.params.command;

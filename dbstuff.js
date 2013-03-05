@@ -1,10 +1,10 @@
 var Db = require('mongodb').Db,
-        MongoClient = require('mongodb').MongoClient,
-        Server = require('mongodb').Server,
-        ObjectID = require('mongodb').ObjectID,
-        Binary = require('mongodb').Binary,
-        Code = require('mongodb').Code,
-        BSON = require('mongodb').pure().BSON;
+    MongoClient = require('mongodb').MongoClient,
+    Server = require('mongodb').Server,
+    ObjectID = require('mongodb').ObjectID,
+    Binary = require('mongodb').Binary,
+    Code = require('mongodb').Code,
+    BSON = require('mongodb').pure().BSON;
 
 var client = new Db('wolken', new Server("127.0.0.1", 27017, {}), {
     w: 1
@@ -21,10 +21,9 @@ var dbutil = {
     save: function(colName, data, save_callback) {
         dbutil.col(colName, function(err, collection) {
             data.timestamp = new Date();
-            console.log(data);
             collection.save(data, {
                 w: 1
-            }, function() {
+            }, function(err) {
                 client.close();
                 console.log(data);
                 save_callback(data);
@@ -32,12 +31,12 @@ var dbutil = {
         });
     },
     find: function(colName, find_data, find_callback) {
+        console.log("find", find_data)
         dbutil.col(colName, function(err, collection) {
             collection.find(find_data).toArray(function(err, items) {
                 client.close();
-                if (items.length > 0) {
-                    find_callback(items);
-                }
+                find_callback(items);
+
             });
         });
     },
@@ -65,16 +64,45 @@ exports.saveData = function(saveData, cb) {
         });
     });
 };
+exports.getImages = function(max, cb) {
+    var limit = {};
+    if (!cb) {
+        cb = max;
+    } else {
+        limit = {
+            limits: max
+        };
+    }
 
+    dbutil.col('files', function(err, collection) {
+        collection.find({
+            timestamp: {
+                $exists: true
+            },
+            purpose: "BackGround"
+        }, limit).toArray(function(err, items) {
+            client.close();
+             cb(items);
+        });
+    });
+};
 exports.saveSignup = function(saveData, cb) {
-    console.log(saveData);
     dbutil.save('users', saveData, cb);
 };
-exports.findUser = function(userData, cb) {
-    console.log("findUser",userData);
-    dbutil.find('users', userData,cb);
+exports.saveSession = function(sessionData, cb) {
+    dbutil.save('loginsessions', sessionData, cb);
 };
-
+exports.findUser = function(userData, cb) {
+    //console.log("findUser",userData);
+    dbutil.find('users', userData, cb);
+};
+exports.findSession = function(sessionId, cb) {
+    var sId = ObjectID.createFromHexString(sessionId);
+    console.log("findSession", sessionId);
+    dbutil.findOne('loginsessions', {
+        _id: sId
+    }, cb);
+};
 exports.loadData = function(oIdStr, cb) {
     dbutil.col('linedata', function(err, collection) {
         if (oIdStr) {
@@ -83,25 +111,14 @@ exports.loadData = function(oIdStr, cb) {
                 _id: oId
             }).toArray(function(err, items) {
                 client.close();
-                if (items.length > 0)
-                    cb(items[0]);
+                if (items.length > 0) cb(items[0]);
             });
         }
     });
 };
 
 exports.saveFile = function(saveData, cb) {
-    dbutil.col('files', function(err, collection) {
-        saveData.timestamp = new Date();
-        console.log("meta", saveData);
-        collection.save(saveData, {
-            w: 1
-        }, function() {
-            client.close();
-            cb(saveData._id);
-
-        });
-    });
+    dbutil.save('files', saveData, cb);
 };
 
 exports.listData = function(maxcount, cb) {
@@ -117,22 +134,20 @@ exports.listData = function(maxcount, cb) {
             }
         }).toArray(function(err, items) {
             client.close();
-            if (items.length > 0)
-                cb(items);
+            if (items.length > 0) cb(items);
         });
     });
 };
 
 exports.getImageMeta = function(imageId, cb) {
     dbutil.col('files', function(err, collection) {
-        console.log(imageId);
+        //console.log(imageId);
         var oId = ObjectID.createFromHexString(imageId);
         collection.find({
             _id: oId
         }).toArray(function(err, items) {
             client.close();
-            if (!err && items.length > 0)
-                cb(imageId, items[0]);
+            if (!err && items.length > 0) cb(imageId, items[0]);
         });
     });
 };
