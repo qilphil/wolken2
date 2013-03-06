@@ -9,10 +9,9 @@ exports.index = function(req, res) {
 
     console.log(req.currentUser);
     res.render('admin', {
-      user:req.currentUser,
       title: 'Admin',
-      body: message,
-      load_id: ""
+      images:results,
+      body: message
     });
-  })
+  });
 };

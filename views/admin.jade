@@ -1,9 +1,15 @@
 extends layout
 
 block content
-  #mainimg
-    canvas#canvas
+  #topMessage!= body
+  #adminImages
+    each image in images
+      .imgBox
+        span.name!= image.name
+        spam.img
+          img(src="/bg/"+image._id,width="100",height="100")
+        span.imgCreated!= image.timestamp
   #messageBox
-  input#load_id(type='hidden',value=load_id)
+  
 
     

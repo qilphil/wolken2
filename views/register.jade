@@ -1,25 +1,20 @@
 extends layout
 
+mixin controlgroup(type,name,placeholder)
+  .control-group
+    label.control-label(for="inp_"+name)
+      = placeholder
+    .controls
+      input(id="inp_"+name,type=type,name=name,placeholder=placeholder)
+
 block content
   #messageBox
   form.form-horizontal#frm_signup
-    .control-group
-      .controls
-        input#inp_name(type='text',name="name",placeholder='Username')
-    .control-group
-      .controls
-        input#inp_email(type='email',name="email",placeholder='EMail')
-    .control-group
-      .controls
-        input#inp_password(type='password',name="password",placeholder='Passwort')
-    .control-group
-      .controls
-        input#inp_password2(type='password',name="password2",placeholder='Passwort nochmal')
+    mixin controlgroup('text','name','Username')
+    mixin controlgroup('email','email','EMail')
+    mixin controlgroup('password','password','Passwort')
+    mixin controlgroup('password','password2','Passwort nochmal')
     .control-group
       .controls
         button.btn#btn_signup(type='submit')
-          | Anmelden
-
-
-
-    
+          | Anmelden  

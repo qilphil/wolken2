@@ -16,13 +16,23 @@ exports.createThumb = function(id, cb) {
     im.resize(thumbOptions, function(err, stdout, stderr) {
         if (err) throw err;
         fs.writeFileSync(filestuff.makeName('thumbs/tn_' + id, 'jpg'), stdout, 'binary');
-    })
+    });
     cb(thumbOptions);
-}
+};
+exports.identify=function(imgPath,cb) {
+        im.identify(imgPath, function(error,data){
+        if (error) {
+            console.log("IM Error Identify ",imgPath);
+            console.log("error:",error);
+            throw error;
+        };
+       cb(data);
+    });
+};
 var test_id = '512e4425e02a032800000008';
 exports.createThumb(test_id, function(data) {
     var targetname = filestuff.makeName('thumbs/tn_' + test_id, 'jpg');
     im.identify(targetname, function(error, data) {
         console.log(data);
-    })
-})
+    });
+});

@@ -1,40 +1,43 @@
 var Db = require('mongodb').Db,
-    MongoClient = require('mongodb').MongoClient,
-    Server = require('mongodb').Server,
-    ObjectID = require('mongodb').ObjectID,
-    Binary = require('mongodb').Binary,
-    Code = require('mongodb').Code,
-    BSON = require('mongodb').pure().BSON;
+        MongoClient = require('mongodb').MongoClient,
+        Server = require('mongodb').Server,
+        ObjectID = require('mongodb').ObjectID,
+        Binary = require('mongodb').Binary,
+        Code = require('mongodb').Code,
+        BSON = require('mongodb').pure().BSON;
 
-var client = new Db('wolken', new Server("127.0.0.1", 27017, {}), {
-    w: 1
-});
+var client;
 
 var dbutil = {
-    col: function(colName, col_callback) {
+    open: function() {
+        client = new Db('wolken', new Server("127.0.0.1", 27017, {}), {
+            w: 1
+        });
         client.open(function(err, p_client) {
-            client.collection(colName, function(err, collection) {
-                col_callback(err, collection);
-            });
+            if (err) {
+                console.log("Can't open DB Connection", err);
+                throw err;
+            }
+        })
+    },
+    col: function(colName, col_callback) {
+        client.collection(colName, function(err, collection) {
+            col_callback(err, collection);
         });
     },
     save: function(colName, data, save_callback) {
         dbutil.col(colName, function(err, collection) {
             data.timestamp = new Date();
-            collection.save(data, {
-                w: 1
-            }, function(err) {
-                client.close();
-                console.log(data);
+            collection.save(data, function(err) {
+//                console.log(data);
                 save_callback(data);
             });
         });
     },
     find: function(colName, find_data, find_callback) {
-        console.log("find", find_data)
+        // console.log("find", find_data)
         dbutil.col(colName, function(err, collection) {
             collection.find(find_data).toArray(function(err, items) {
-                client.close();
                 find_callback(items);
 
             });
@@ -43,7 +46,6 @@ var dbutil = {
     findOne: function(colName, find_data, findone_callback) {
         dbutil.col(colName, function(err, collection) {
             collection.findOne(find_data, function(err, item) {
-                client.close();
                 findone_callback(item);
             });
         });
@@ -56,10 +58,7 @@ exports.util = dbutil;
 exports.saveData = function(saveData, cb) {
     dbutil.col('linedata', function(err, collection) {
         saveData.timestamp = new Date();
-        collection.save(saveData, {
-            w: 1
-        }, function() {
-            client.close();
+        collection.save(saveData,  function() {
             cb(saveData._id);
         });
     });
@@ -81,8 +80,7 @@ exports.getImages = function(max, cb) {
             },
             purpose: "BackGround"
         }, limit).toArray(function(err, items) {
-            client.close();
-             cb(items);
+            cb(items);
         });
     });
 };
@@ -93,25 +91,25 @@ exports.saveSession = function(sessionData, cb) {
     dbutil.save('loginsessions', sessionData, cb);
 };
 exports.findUser = function(userData, cb) {
-    //console.log("findUser",userData);
     dbutil.find('users', userData, cb);
 };
+
 exports.findSession = function(sessionId, cb) {
     var sId = ObjectID.createFromHexString(sessionId);
-    console.log("findSession", sessionId);
+    //console.log("findSession", sessionId);
     dbutil.findOne('loginsessions', {
         _id: sId
     }, cb);
 };
+
 exports.loadData = function(oIdStr, cb) {
     dbutil.col('linedata', function(err, collection) {
         if (oIdStr) {
-            var oId = ObjectID.createFromHexString(oIdStr);
             collection.find({
-                _id: oId
+                _id: ObjectID.createFromHexString(oIdStr)
             }).toArray(function(err, items) {
-                client.close();
-                if (items.length > 0) cb(items[0]);
+                if (items.length > 0)
+                    cb(items[0]);
             });
         }
     });
@@ -133,21 +131,22 @@ exports.listData = function(maxcount, cb) {
                 timestamp: 1
             }
         }).toArray(function(err, items) {
-            client.close();
-            if (items.length > 0) cb(items);
+            if (items.length > 0)
+                cb(items);
         });
     });
 };
 
 exports.getImageMeta = function(imageId, cb) {
     dbutil.col('files', function(err, collection) {
-        //console.log(imageId);
+        console.log(imageId);
+        if (imageId)
         var oId = ObjectID.createFromHexString(imageId);
         collection.find({
             _id: oId
         }).toArray(function(err, items) {
-            client.close();
-            if (!err && items.length > 0) cb(imageId, items[0]);
+            if (!err && items.length > 0)
+                cb(imageId, items[0]);
         });
     });
 };
@@ -160,24 +159,20 @@ exports.setoId = function(dataObject, memberName) {
 };
 
 exports.getMoD = function(callback) {
-    client.open(function(err, p_client) {
-        client.collection('wolken', function(err, collection) {
-            // Locate all the entries using find
-            collection.findOne({
-                dtype: "WolkenMoD"
-            }, function(err, results) {
-                if (!results) {
-                    var results = {
-                        dtype: "WolkenMoD",
-                        Message: "Error Message of the Day"
-                    };
-                    collection.save(results, {
-                        w: 0
-                    });
-                }
-                client.close();
-                callback(err, results);
-            });
+    client.collection('wolken', function(err, collection) {
+        // Locate all the entries using find
+        collection.findOne({
+            dtype: "WolkenMoD"
+        }, function(err, results) {
+            if (!results) {
+                var results = {
+                    dtype: "WolkenMoD",
+                    Message: "Error Message of the Day"
+                };
+                collection.save(results);
+            }
+            callback(err, results);
         });
     });
+
 };

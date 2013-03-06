@@ -10,6 +10,7 @@
     "jade": "*",
     "mongodb":"*",
     "imagemagick":"*",
-    "backbone":"*"
+    "backbone":"*",
+    "q":">0.9.0"
   }
 }

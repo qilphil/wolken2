@@ -2,13 +2,15 @@
  * GET users listing.
  */
 var dbstuff = require("../dbstuff"),
-    filestuff = require("../filestuff");
-
-var userstuff = require("../userstuff");
+        filestuff = require("../filestuff"),
+        imgstuff = require("../imgstuff"),
+        userstuff = require("../userstuff");
 var signup = require("./signup");
+var image = require("./image");
 var ajax = {};
+
+
 ajax.commands = {
-    
     save: function(req, res) {
         try {
             var inData = JSON.parse(req.body.data);
@@ -55,34 +57,7 @@ ajax.commands = {
             res.send(JSON.stringify(return_data));
         }
     },
-    uploadBackground: function(req, res) {
-        var inData = req.body;
-        var fileData = inData.fileData;
-        console.log("gotData");
-
-        var metaData = {
-            purpose: "BackGround",
-            fileType: "jpg",
-            fileName: inData.fileName
-        };
-
-        dbstuff.saveFile(metaData, function(newID) {
-            var savePath = filestuff.makeName(newID, "jpg");
-            console.log("saveName", savePath);
-            filestuff.save(fileData, savePath, function(err) {
-                console.log("saved");
-                var return_data = {
-                    Message: "Saved to " + newID + ".jpg",
-                    backgroundUrl: "/bg/" + newID
-                };
-                if (err) {
-                    return_data.Message = "Save Failed: " + err.message + " Path: " + savePath + " ID:" + newID;
-                    return_data.error = err.message;
-                }
-                res.send(JSON.stringify(return_data));
-            });
-        });
-    },
+    uploadBackground: image.uploadBackground,
     list: function(req, res) {
         try {
             var inData = JSON.parse(req.body.data);
@@ -91,7 +66,8 @@ ajax.commands = {
                     var dataLine = gotData[i];
                     dataLine.session_id = dataLine._id.toString();
                     delete dataLine._id;
-                };
+                }
+                ;
                 var return_data = {
                     Message: "found " + gotData.length,
                     count: gotData.length,

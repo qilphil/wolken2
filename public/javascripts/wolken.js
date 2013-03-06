@@ -209,7 +209,7 @@ app = {
     login_success: function(data, status, xhr) {
       console.log(data);
         var erroralert = $("<div class='alert'><button type='button' class='close' data-dismiss='alert'>&times;</button><strong>Fehler ! </strong><span id='alertMessage'>" + data.Message + "</span></div>");
-        if (data.status=="login_success") erroralert.addClass('alert-success').find("strong").html('');
+        if (data.status==="login_success") erroralert.addClass('alert-success').find("strong").html('');
         $("#messageBox").append(erroralert);
         $("#inp_" + data.Field).closest(".control-group").addClass("error");
         app.setTopMessage($("<span>User Created </span>"));
@@ -287,7 +287,7 @@ app = {
             e.preventDefault();
             $(this).css("border-color", "black");
             var droppedFiles = e.target.files || e.dataTransfer.files;
-
+            app.setMessage("Uploading");
             if (droppedFiles.length > 0) {
                 var file = droppedFiles[0];
                 var re_jpg = /.jpe?g$/i;
@@ -295,6 +295,7 @@ app = {
                     var fr = new FileReader();
                     fr.onload = function(e) {
                         app.drawing.loadImage(e.target.result);
+                        app.setMessage("Uploading "+file.name);
                         ajax.uploadBackground(file.name, e.target.result);
                     };
                     fr.readAsDataURL(file);
@@ -347,7 +348,7 @@ app.events = {
             app.addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, false);
         },
         mouseover: function(e) {
-            var buttons = e.buttons == 'undefined' ? e.which : e.buttons;
+            var buttons = (e.buttons == 'undefined') ? e.which : e.buttons;
             app.wolken.paint = buttons & 1;
         },
         mousemove: function(e) {

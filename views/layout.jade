@@ -1,82 +1,22 @@
 !!! 5
 html(lang='en')
 head
-    meta(charset='utf-8')
-    title Wolkenstarrer by Phil and Reffi
-    meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    meta(name='description', content='')
-    meta(name='author', content='')
-    //
-       Le styles 
-    link(rel='stylesheet', type='text/css', href='../assets/css/bootstrap.min.css')
-    
-    link(rel='stylesheet', type='text/css', href='/assets/css/wolken.css')
-    
-      
-    //
-       Le HTML5 shim, for IE6-8 support of HTML5 elements 
-    //if lt IE 9
-      script(src='http://html5shim.googlecode.com/svn/trunk/html5.js')
-    //
-       Le fav and touch icons 
-    link(rel='shortcut icon', href='../assets/ico/favicon.ico')
-  body
-    .navbar.navbar-fixed-top
-      .navbar-inner
-        .container-fluid
-          a.btn.btn-navbar(data-toggle='collapse', data-target='.nav-collapse')
-            span.icon-bar
-            span.icon-bar
-            span.icon-bar
-          a.brand(href='#') Wolkenstarrer
-          .btn-group.pull-right
-            a.btn.dropdown-toggle(data-toggle='dropdown', href='#')
-              if locals.user 
-                i.icon-user
-                | &nbsp; #{user.name}
-              else
-                | &nbsp; Nicht Angemeldet
-              span.caret
-            ul.dropdown-menu
-              if  locals.user
-                li
-                  a(href='/profile') Profile
-                li.divider
-                li
-                  a(href='/signout') Sign Out
-              else
-                li
-                  a(href='/signup') Sign up
-                li.divider
-                li
-                  a(href='/login') Log in
-          .nav-collapse
-            ul.nav
-              li.active
-                a(href='/') Start Over
-              li
-                a#runList List
-              if locals.user 
-                li
-                  a(href='/admin') Admin
-                
-              li
-                a#topStatus 
-    .container-fluid
-      .row-fluid
-        #mainblock.span9
-          .row-fluid
-            .span12
-              p
-               block content
-      hr
-      footer
-        p © Philipp Lutz 2013
+  include includes/head
+body
+  include includes/nav
+  .container-fluid
+    .row-fluid
+      #mainblock.span12
+        .span12
+           block content
+    hr
+    footer
+      p © Philipp Lutz 2013
 
-    script(src='/assets/js/json2.js')
-    script(src='/assets/js/jquery.js')
-    script(src='/assets/js/underscore-min.js')
-    script(src='/assets/js/backbone-min.js')
-    script(src='/assets/js/bootstrap.min.js')
-    
-    script(src='/javascripts/wolken.js')    
+  script(src='/assets/js/json2.js')
+  script(src='/assets/js/jquery.js')
+  script(src='/assets/js/underscore-min.js')
+  script(src='/assets/js/backbone-min.js')
+  script(src='/assets/js/bootstrap.min.js')
+  
+  script(src='/javascripts/wolken.js')    

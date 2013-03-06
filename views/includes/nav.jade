@@ -1,0 +1,40 @@
+.navbar.navbar-fixed-top
+  .navbar-inner
+    .container-fluid
+      a.btn.btn-navbar(data-toggle='collapse', data-target='.nav-collapse')
+        span.icon-bar
+        span.icon-bar
+        span.icon-bar
+      a.brand(href='#') Wolkenstarrer
+      .btn-group.pull-right
+        a.btn.dropdown-toggle(data-toggle='dropdown', href='#')
+          if locals.user 
+            i.icon-user
+            | &nbsp; #{user.name}
+          else
+            | &nbsp; Nicht Angemeldet
+          span.caret
+        ul.dropdown-menu
+          if  locals.user
+            li
+              a(href='/profile') Profile
+            li.divider
+            li
+              a(href='/signout') Sign Out
+          else
+            li
+              a(href='/signup') Sign up
+            li.divider
+            li
+              a(href='/login') Log in
+      .nav-collapse
+        ul.nav
+          li.active
+            a(href='/') Start Over
+          li
+            a#runList List
+          if locals.user 
+            li
+              a(href='/admin') Admin
+          li
+            a#topStatus 

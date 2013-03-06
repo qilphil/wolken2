@@ -12,10 +12,12 @@ var express = require('express')
         , index = require('./routes/index')
         , ajax = require('./routes/ajax')
         , http = require('http')
-        , path = require('path');
+        , path = require('path')
+        , dbstuff = require('./dbstuff');
+
 
 var app = express();
-
+dbstuff.util.open();
 
 app.configure(function() {
     app.set('port', process.env.PORT || 3000);
@@ -27,16 +29,17 @@ app.configure(function() {
     app.use(express.methodOverride());
     app.use(express.cookieParser('your secret here'));
     app.use(express.session());
-    app.use(express.static(path.join(__dirname, 'public')));
     app.use(user.loadUser);
     app.use(app.router);
-    
+    app.use(express.static(path.join(__dirname, 'public')));
 });
 
 app.configure('development', function() {
     app.use(express.errorHandler());
 });
-
+app.configure('production', function() {
+    app.use(express.errorHandler());
+});
 app.get("/i/:sessionid", image.index);
 app.get("/bg/:imageid", image.sendBackground);
 app.get("/tn/:imageid", image.sendThumbnail);
@@ -46,7 +49,7 @@ app.get("/signout", user.signout);
 app.get("/signup", user.register);
 app.get("/login", user.login);
 //app.all('*', user.requireAuthentication, user.loadUser);
-app.get("/admin", admin.index);
+app.get("/admin",user.requireAuthentication, admin.index);
 
 http.createServer(app).listen(app.get('port'), function() {
     console.log("Express server listening on port " + app.get('port'));
