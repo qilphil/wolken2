@@ -8,6 +8,8 @@ body
     .row-fluid
       #mainblock.span12
         .span12
+           if locals.title
+              h2!=title
            block content
     hr
     footer

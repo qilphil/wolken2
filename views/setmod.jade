@@ -1,0 +1,18 @@
+extends layout
+include includes/mixins
+block content
+  #messageBox
+  form.form-horizontal#frm_login
+    .control-group
+      .controls
+        textarea#txt_newmod(name="newmod")!= currentMoD
+          
+
+    .control-group
+      .controls
+        button.btn#btn_setmod(type='submit')
+          | Speichern
+
+
+
+    

@@ -16,10 +16,10 @@ exports.index = function(req, res, next) {
     });
 };
 exports.setmod = function(req, res, next) {
-    dbstuff.getMod(function(editMoD) {
+    dbstuff.getMoD(function(err,MoDobj) {
         res.render('setmod', {
             title: 'Set Message of the Day',
-            currentMoD: editMoD
+            currentMoD: MoDobj.Message
         });
     });
 };

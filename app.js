@@ -11,6 +11,7 @@ var express = require('express')
         , admin = require('./routes/admin')
         , index = require('./routes/index')
         , ajax = require('./routes/ajax')
+        , flickr = require('./routes/flickr')
         , http = require('http')
         , path = require('path')
         , dbstuff = require('./dbstuff');
@@ -49,8 +50,11 @@ app.post('/ajax/:command', ajax.run);
 app.get("/signout", user.signout);
 app.get("/signup", user.register);
 app.get("/login", user.login);
+app.get("/bggallery", flickr.index);
+
 //app.all('*', user.requireAuthentication, user.loadUser);
 app.get("/admin",user.requireAuthentication, admin.index);
+app.get("/setmod",user.requireAuthentication, admin.setmod);
 
 http.createServer(app).listen(app.get('port'), function() {
     console.log("Express server listening on port " + app.get('port'));

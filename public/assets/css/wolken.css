@@ -5,26 +5,35 @@
     Description:
         Purpose of the stylesheet follows.
 */
+body
+{
+  padding-top:60px;
+  padding-bottom:40px
+}
 
-body {
-    padding-top: 60px;
-    padding-bottom: 40px;
+.sidebar-nav
+{
+  padding:9px 0
 }
-.sidebar-nav {
-    padding: 9px 0;
-}
-#adminImages {
+
+#adminImages
+{
   border:1px solid #ccc;
-  margin: 2px;
-  overflow: hidden;
+  margin:2px;
+  overflow:hidden
 }
 
-.imgBox {
-float:left;
-width:256px;
-height:256px;
-margin:3px;
-border:1px solid #ddd;
-padding:5px;
-overflow:hidden;
+.imgBox
+{
+  float:left;
+  width:256px;
+  height:256px;
+  margin:3px;
+  border:1px solid #ddd;
+  padding:5px;
+  overflow:hidden
+}
+#txt_newmod {
+  width:500px;
+  height: 130px;
 }

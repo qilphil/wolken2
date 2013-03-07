@@ -30,7 +30,8 @@ var dbutil = {
             data.timestamp = new Date();
             collection.save(data, function(err) {
 //                console.log(data);
-                save_callback(data);
+                if (save_callback) 
+                       save_callback(data);
             });
         });
     },
@@ -58,7 +59,7 @@ exports.util = dbutil;
 exports.saveData = function(saveData, cb) {
     dbutil.col('linedata', function(err, collection) {
         saveData.timestamp = new Date();
-        collection.save(saveData,  function() {
+        collection.save(saveData, function() {
             cb(saveData._id);
         });
     });
@@ -141,7 +142,7 @@ exports.getImageMeta = function(imageId, cb) {
     dbutil.col('files', function(err, collection) {
         console.log(imageId);
         if (imageId)
-        var oId = ObjectID.createFromHexString(imageId);
+            var oId = ObjectID.createFromHexString(imageId);
         collection.find({
             _id: oId
         }).toArray(function(err, items) {
@@ -159,19 +160,14 @@ exports.setoId = function(dataObject, memberName) {
 };
 
 exports.getMoD = function(callback) {
-    client.collection('wolken', function(err, collection) {
-        // Locate all the entries using find
-        collection.findOne({
-            dtype: "WolkenMoD"
-        }, function(err, results) {
-            if (!results) {
-                var results = {
-                    dtype: "WolkenMoD",
-                    Message: "Error Message of the Day"
-                };
-                collection.save(results);
-            }
-            callback(err, results);
-        });
+    dbutil.findOne('wolken', {dtype: "WolkenMoD"}, function(err, results) {
+        if (!results) {
+            var results = {
+                dtype: "WolkenMoD",
+                Message: "Error Message of the Day"
+            };
+            dbutil.save("wolken",results);
+        }
+        callback(err, results);
     });
 };

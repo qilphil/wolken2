@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  #messageBox!=Message
+  if locals.images
+    each image in images
+      .bgg_pic
+        a(href=image.link)
+          img.bgg_img(src=image.media.m)
+
+    
