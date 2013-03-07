@@ -43,6 +43,7 @@ app.configure('production', function() {
 app.get("/i/:sessionid", image.index);
 app.get("/bg/:imageid", image.sendBackground);
 app.get("/tn/:imageid", image.sendThumbnail);
+app.get("/tn/:imageid/:wxh", image.sendThumbnail);
 app.get('/', routes.index);
 app.post('/ajax/:command', ajax.run);
 app.get("/signout", user.signout);

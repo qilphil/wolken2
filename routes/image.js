@@ -6,31 +6,36 @@ var dbstuff = require("../dbstuff");
 var filestuff = require("../filestuff");
 var imgstuff = require("../imgstuff");
 var fs = require("fs");
-exports.sendThumbnail = function(req, res) {
+
+exports.sendThumbnail = function(req, res, next) {
     var imageId = req.params.imageid;
     console.log(imageId);
-    dbstuff.getImageMeta(imageId, function(imageId, metaData) {
-        res.sendfile(filestuff.makeName("thumbs/tn_" + imageId, "jpg"));
-    });
-};
-exports.sendBackground = function(req, res) {
-    var imageId = req.params.imageid;
-    dbstuff.getImageMeta(imageId, function(imageId, metaData) {
-        var imgPath = filestuff.makeName(imageId, "jpg");
-        fs.exists(imgPath, function( exists)
+    var width, height;
+    if (req.params.wxh) {
+        var w_by_h = req.params.wxh.split('x');
+        if (parseInt(w_by_h[0]) > 0)
         {
-            if (exists) {
-                res.sendfile(imgPath);
-            }
-            else {
-                res.statusCode = 404;
-                res.send(imageId + ".jpg not found");
-            }
-        });
+            width = parseInt(w_by_h[0]);
+            if (parseInt(w_by_h[1]))
+                height = parseInt(w_by_h[1]);
+        }
+    }
+    var thumbPath = filestuff.makeName("thumbs/tn_" + imageId, "jpg", width, height);
+    var sendit = function() {
+        filestuff.sendJpgPath(thumbPath, res);
+    };
+    fs.exists(thumbPath, function(exists) {
+        exists ? sendit() : imgstuff.createThumb(imageId, sendit, width, height);
     });
 };
 
-exports.index = function(req, res) {
+exports.sendBackground = function(req, res, next) {
+    var imageId = req.params.imageid;
+    var imgPath = filestuff.makeName(imageId, "jpg");
+    filestuff.sendJpgPath(imgPath, res);
+};
+
+exports.index = function(req, res, next) {
     dbstuff.getMoD(function(err, results) {
         res.render('index', {
             title: 'Express',
@@ -39,7 +44,7 @@ exports.index = function(req, res) {
         });
     });
 };
-exports.uploadBackground = function(req, res) {
+exports.uploadBackground = function(req, res, next) {
     var inData = req.body;
     var fileData = inData.fileData;
 
@@ -60,17 +65,19 @@ exports.uploadBackground = function(req, res) {
                 dbstuff.saveFile(metaData, function(newMetaData) {
                     var return_data = {
                         Message: "Saved to " + newID + ".jpg",
+                        status: "bgsave_success",
+                        error: false,
                         backgroundUrl: "/bg/" + newID
                     };
-                    console.log("fullData", newMetaData);
                     if (err) {
                         return_data.Message = "Save Failed: " + err.message + " Path: " + savePath + " ID:" + newID;
-                        return_data.status = "bgsave_failed",
-                                return_data.error = true;
+                        return_data.status = "bgsave_failed";
+                        return_data.error = true;
                     }
                     res.send(JSON.stringify(return_data));
                 });
             });
+            imgstuff.createThumb(newID);
         });
     });
 };

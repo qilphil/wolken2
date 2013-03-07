@@ -11,7 +11,7 @@ var ajax = {};
 
 
 ajax.commands = {
-    save: function(req, res) {
+    save: function(req, res, next) {
         try {
             var inData = JSON.parse(req.body.data);
 
@@ -34,7 +34,7 @@ ajax.commands = {
             res.send(JSON.stringify(return_data));
         }
     },
-    load: function(req, res) {
+    load: function(req, res, next) {
         try {
             var inData = JSON.parse(req.body.data);
 
@@ -58,7 +58,7 @@ ajax.commands = {
         }
     },
     uploadBackground: image.uploadBackground,
-    list: function(req, res) {
+    list: function(req, res, next) {
         try {
             var inData = JSON.parse(req.body.data);
             dbstuff.listData(inData.maxcount ? inData.maxcount : 0, function(gotData) {
@@ -88,11 +88,11 @@ ajax.commands = {
 ajax.commands.save_signup = signup.save_signup;
 ajax.commands.do_login = signup.do_login;
 
-exports.run = function(req, res) {
+exports.run = function(req, res, next) {
     var command = req.params.command;
     if (ajax.commands[command]) {
         console.log("ajax command:", command);
-        ajax.commands[command](req, res);
+        ajax.commands[command](req, res, next);
     } else {
         console.log("unknown ajax command:", command);
     }

@@ -5,7 +5,7 @@ var dbstuff = require("../dbstuff"),
     filestuff = require("../filestuff");
 
 var userstuff = require("../userstuff");
-exports.do_login = function(req, res) {
+exports.do_login = function(req, res, next) {
     var val = {
 
         fail: function(msg, field) {
@@ -17,11 +17,11 @@ exports.do_login = function(req, res) {
             };
             return !(inData[field] == "");
         },
-        returnMsg: function(Message, field, Error, status, id) {
+        returnMsg: function(Message, field, error, status, id) {
             res.send(JSON.stringify({
                 Message: Message,
                 Field: field,
-                Error: Error,
+                error: error,
                 status: status,
                 id: id
             }));
@@ -69,7 +69,7 @@ exports.do_login = function(req, res) {
         val.returnMsg("error:" + exError.toString(), "", true, "signup_fail", '');
     }
 };
-exports.save_signup = function(req, res) {
+exports.save_signup = function(req, res, next) {
     var val = {
         fail: function(msg, field) {
             this.returnMsg(msg, field, true, "signup_fail", '');
@@ -82,11 +82,11 @@ exports.save_signup = function(req, res) {
             return !(inData[field] == "");
         },
 
-        returnMsg: function(Message, field, Error, status, id) {
+        returnMsg: function(Message, field, error, status, id) {
             res.send(JSON.stringify({
                 Message: Message,
                 Field: field,
-                Error: Error,
+                error: error,
                 status: status,
                 id: id
             }));

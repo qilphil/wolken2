@@ -29,12 +29,12 @@ exports.loadUser = function(req, res, next) {
         next();
     }
 };
-exports.register = function(req, res) {
+exports.register = function(req, res, next) {
     res.render('register', {
         title: 'Anmelden'
     });
 };
-exports.login = function(req, res) {
+exports.login = function(req, res, next) {
     if (!req.session.logintry) {
         req.session.logintry = 1;
     } else {
@@ -45,7 +45,7 @@ exports.login = function(req, res) {
         title: 'Einloggen'
     });
 };
-exports.index = function(req, res) {
+exports.index = function(req, res, next) {
     dbstuff.getUsers(function(err, results) {
         res.render('users', {
             title: 'UserAdmin',
@@ -53,7 +53,7 @@ exports.index = function(req, res) {
         });
     });
 };
-exports.signout = function(req, res) {
+exports.signout = function(req, res, next) {
     delete req.session.session_id;
     res.redirect("/");
 };

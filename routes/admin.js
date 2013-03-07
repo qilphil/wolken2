@@ -3,15 +3,23 @@
  */
 var dbstuff = require("../dbstuff");
 
-exports.index = function(req, res) {
-  dbstuff.getImages(function( results) {
-    var message = results ? "Images: " + results.length : "no Images";
+exports.index = function(req, res, next) {
+    dbstuff.getImages(function(results) {
+        var message = results ? "Images: " + results.length : "no Images";
 
-    console.log(req.currentUser);
-    res.render('admin', {
-      title: 'Admin',
-      images:results,
-      body: message
+        console.log(req.currentUser);
+        res.render('admin', {
+            title: 'Admin',
+            images: results,
+            body: message
+        });
     });
-  });
+};
+exports.setmod = function(req, res, next) {
+    dbstuff.getMod(function(editMoD) {
+        res.render('setmod', {
+            title: 'Set Message of the Day',
+            currentMoD: editMoD
+        });
+    });
 };
