@@ -6,43 +6,50 @@ var Db = require('mongodb').Db,
         Code = require('mongodb').Code,
         BSON = require('mongodb').pure().BSON;
 
-var client;
+
 
 var dbutil = {
-    open: function() {
-        client = new Db('wolken', new Server("127.0.0.1", 27017, {}), {
+    db: null,
+    open: function(open_callback) {
+        this.db = new Db('wolken', new Server('127.0.0.1', 27017, {}), {
             w: 1
         });
-        client.open(function(err, p_client) {
+        this.db.open(function(err, p_client) {
             if (err) {
-                console.log("Can't open DB Connection", err);
+                console.log('Can\'t open DB Connection', err);
                 throw err;
             }
-        })
+            else {
+                if (open_callback)
+                    open_callback(err,p_client);
+            }
+        });
     },
     col: function(colName, col_callback) {
-        client.collection(colName, function(err, collection) {
+        this.db.collection(colName, function(err, collection) {
             col_callback(err, collection);
         });
     },
     save: function(colName, data, save_callback) {
-        dbutil.col(colName, function(err, collection) {
-            data.timestamp = new Date();
-            collection.save(data, function(err) {
+        var runCallback = function(err) {
 //                console.log(data);
-                if (save_callback) 
-                       save_callback(data);
-            });
-        });
+            if (save_callback)
+                save_callback(data);
+        };
+        var saveData = function(err, collection) {
+            data.timestamp = new Date();
+            collection.save(data, runCallback);
+        };
+        dbutil.col(colName, saveData);
     },
     find: function(colName, find_data, find_callback) {
-        // console.log("find", find_data)
-        dbutil.col(colName, function(err, collection) {
+        // console.log('find', find_data)
+        var handleFoundData = function(err, collection) {
             collection.find(find_data).toArray(function(err, items) {
                 find_callback(items);
-
-            });
-        });
+            })
+        };
+        dbutil.col(colName, handleFoundData);
     },
     findOne: function(colName, find_data, findone_callback) {
         dbutil.col(colName, function(err, collection) {
@@ -79,7 +86,7 @@ exports.getImages = function(max, cb) {
             timestamp: {
                 $exists: true
             },
-            purpose: "BackGround"
+            purpose: 'BackGround'
         }, limit).toArray(function(err, items) {
             cb(items);
         });
@@ -97,7 +104,7 @@ exports.findUser = function(userData, cb) {
 
 exports.findSession = function(sessionId, cb) {
     var sId = ObjectID.createFromHexString(sessionId);
-    //console.log("findSession", sessionId);
+    //console.log('findSession', sessionId);
     dbutil.findOne('loginsessions', {
         _id: sId
     }, cb);
@@ -140,7 +147,6 @@ exports.listData = function(maxcount, cb) {
 
 exports.getImageMeta = function(imageId, cb) {
     dbutil.col('files', function(err, collection) {
-        console.log(imageId);
         if (imageId)
             var oId = ObjectID.createFromHexString(imageId);
         collection.find({
@@ -160,14 +166,15 @@ exports.setoId = function(dataObject, memberName) {
 };
 
 exports.getMoD = function(callback) {
-    dbutil.findOne('wolken', {dtype: "WolkenMoD"}, function(err, results) {
+    var handleFoundMoD = function(err, results) {
         if (!results) {
             var results = {
-                dtype: "WolkenMoD",
-                Message: "Error Message of the Day"
+                dtype: 'WolkenMoD',
+                Message: 'Error Message of the Day'
             };
-            dbutil.save("wolken",results);
+            dbutil.save('wolken', results);
         }
         callback(err, results);
-    });
+    }
+    dbutil.findOne('wolken', {dtype: 'WolkenMoD'}, handleFoundMoD);
 };

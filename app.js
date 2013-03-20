@@ -41,21 +41,21 @@ app.configure('development', function() {
 app.configure('production', function() {
     app.use(express.errorHandler());
 });
-app.get("/i/:sessionid", image.index);
-app.get("/bg/:imageid", image.sendBackground);
-app.get("/tn/:imageid", image.sendThumbnail);
-app.get("/tn/:imageid/:wxh", image.sendThumbnail);
+app.get('/i/:sessionid', image.index);
+app.get('/bg/:imageid', image.sendBackground);
+app.get('/tn/:imageid', image.sendThumbnail);
+app.get('/tn/:imageid/:wxh', image.sendThumbnail);
 app.get('/', routes.index);
 app.post('/ajax/:command', ajax.run);
-app.get("/signout", user.signout);
-app.get("/signup", user.register);
-app.get("/login", user.login);
-app.get("/bggallery", flickr.index);
+app.get('/signout', user.signout);
+app.get('/signup', user.register);
+app.get('/login', user.login);
+app.get('/bggallery', flickr.index);
 
 //app.all('*', user.requireAuthentication, user.loadUser);
-app.get("/admin",user.requireAuthentication, admin.index);
-app.get("/setmod",user.requireAuthentication, admin.setmod);
+app.get('/admin',user.requireAuthentication, admin.index);
+app.get('/setmod',user.requireAuthentication, admin.setmod);
 
 http.createServer(app).listen(app.get('port'), function() {
-    console.log("Express server listening on port " + app.get('port'));
+    console.log('Express server listening on port ' + app.get('port'));
 });

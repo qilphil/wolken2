@@ -1,11 +1,6 @@
 extends layout
 
-mixin controlgroup(type,name,placeholder)
-  .control-group
-    label.control-label(for="inp_"+name)
-      = placeholder
-    .controls
-      input(id="inp_"+name,type=type,name=name,placeholder=placeholder)
+include includes/mixins
 
 block content
   #messageBox
