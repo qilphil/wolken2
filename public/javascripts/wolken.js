@@ -1,6 +1,31 @@
 'use strict';
 var app = {};
+var bench = {
+  data: {gen: []},
+  start: function() {
+    return (new Date()).getTime();
+  },
+  mark: function(stime, func) {
 
+    func = func ? func : 'gen';
+    if (!this.data[func])
+      this.data[func] = [];
+
+    this.data[func].push((new Date()).getTime() - stime);
+  },
+  avg: function(statarr) {
+    var sum = 0.0, ll = statarr.length;
+    for (var i = 0; i < ll; i++) {
+      sum += statarr[i];
+    }
+    
+    return sum / ll;
+  },
+  show: function() {
+    for (var func in this.data)
+      console.log("mu: " + func, this.avg(this.data[func]));
+  }
+};
 var ajax = {
   ajaxurl: window.location.protocol + '//' + window.location.host + '/ajax/',
   loadData: function(id, load_success) {
@@ -136,6 +161,7 @@ var drawing = function(imageUrl) {
   if (imageUrl)
     this.loadImage(imageUrl);
 };
+
 drawing.prototype.get_context = function() {
   var ctx = this.context;
   ctx.strokeStyle = '#000';
@@ -143,6 +169,7 @@ drawing.prototype.get_context = function() {
   ctx.lineWidth = 2;
   return ctx;
 };
+
 drawing.prototype.redraw_path_fragment = function(ctx, frag) {
   ctx.beginPath();
   ctx.moveTo(frag.X[frag.X.length - 1], frag.Y[frag.X.length - 1]);
@@ -151,6 +178,7 @@ drawing.prototype.redraw_path_fragment = function(ctx, frag) {
   }
   ctx.stroke();
 };
+
 drawing.prototype.redraw_current = function(ctx, cFrag) {
   var currentLength = cFrag.X.length;
   if (currentLength > 1) {
@@ -161,15 +189,16 @@ drawing.prototype.redraw_current = function(ctx, cFrag) {
     ctx.stroke();
   }
 };
+
 drawing.prototype.loadImage = function(imageUrl) {
   this.cloudImg = $(new Image()).attr('id', 'canvasImg');
   if (imageUrl !== app.defaultImgUrl && !/^data:/.test(imageUrl)) {
     app.wolken.altImage = imageUrl;
   }
-  ;
   this.cloudImg.on('load', this.image_loaded)
           .attr('src', imageUrl);
 };
+
 drawing.prototype.displayImage = function(image) {
   this.canvas.attr({
     Width: image.width + 'px',
@@ -177,12 +206,11 @@ drawing.prototype.displayImage = function(image) {
   }).attr('style', 'Border:3px solid black');
   this.context.drawImage(image, 0, 0, image.width, image.height);
 };
+
 drawing.prototype.image_loaded = function() {
   app.drawing.displayImage(this);
-
   app.redraw();
 };
-
 
 app = {
   masterurl: window.location.protocol + '//' + window.location.host + '/',
@@ -352,7 +380,7 @@ app.events = {
   '#canvas': {
     mouseup: function(e) {
       app.wolken.paint = false;
-
+      bench.show();
     },
     mouseout: function(e) {
       app.wolken.paint = false;
@@ -364,8 +392,10 @@ app.events = {
     },
     mousemove: function(e) {
       if (app.wolken.paint) {
+        var bb = bench.start();
         app.addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
         app.redraw();
+        bench.mark(bb, "move");
       }
     },
     mousedown: function(e) {

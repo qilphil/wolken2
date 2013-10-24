@@ -1,7 +1,10 @@
 extends layout
 
 block content
-  #topMessage!= message_of_the_day
+  if locals.message_of_the_day
+    #topMessage!= message_of_the_day
+  else
+    #topMessage
   #mainimg
     canvas#canvas
   #messageBox
