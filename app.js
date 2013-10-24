@@ -18,7 +18,7 @@ var express = require('express')
 
 
 var app = express();
-dbstuff.util.open();
+dbstuff.util.open("wolken","127.0.0.1",27017);
 
 app.configure(function() {
     app.set('port', process.env.PORT || 3000);

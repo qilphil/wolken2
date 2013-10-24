@@ -10,8 +10,11 @@ var Db = require('mongodb').Db,
 
 var dbutil = {
     db: null,
-    open: function(open_callback) {
-        this.db = new Db('wolken', new Server('127.0.0.1', 27017, {}), {
+    open: function(name, server, port, open_callback) {
+        var dbserver = server ? server : "127.0.0.1";
+        var dbport = port ? port : 27017;
+        var dbname = name ? name : "wolken";
+        this.db = new Db(dbname, new Server(dbserver, dbport, {}), {
             w: 1
         });
         this.db.open(function(err, p_client) {
@@ -21,7 +24,7 @@ var dbutil = {
             }
             else {
                 if (open_callback)
-                    open_callback(err,p_client);
+                    open_callback(err, p_client);
             }
         });
     },
@@ -47,7 +50,7 @@ var dbutil = {
         var handleFoundData = function(err, collection) {
             collection.find(find_data).toArray(function(err, items) {
                 find_callback(items);
-            })
+            });
         };
         dbutil.col(colName, handleFoundData);
     },
@@ -175,6 +178,6 @@ exports.getMoD = function(callback) {
             dbutil.save('wolken', results);
         }
         callback(err, results);
-    }
+    };
     dbutil.findOne('wolken', {dtype: 'WolkenMoD'}, handleFoundMoD);
 };
